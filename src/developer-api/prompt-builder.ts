@@ -1,20 +1,17 @@
 import { SectionBuilder, SectionBuilderFunction } from './section-builder.js';
-import { SectionContentBuilderFunction } from './section-content-builder.js';
 import { Section } from './types.js';
 
 export class PromptBuilder<BuilderData extends Record<string, any> = {}> {
-  // private sections: Section[];
   private sectionData: (
     { func: (data: BuilderData) => Section }
   )[];
 
-  constructor({ sections }: { sections?: Section[] } = {}) {
-    // this.sections = sections || [];
+  constructor() {
     this.sectionData = [];
   }
 
   section(
-    sectionBuilderFunction: SectionBuilderFunction<BuilderData> | SectionContentBuilderFunction<BuilderData>,
+    sectionBuilderFunction: SectionBuilderFunction<BuilderData>,
   ): PromptBuilder<BuilderData> {
     const newSectionBuilder = new SectionBuilder<BuilderData>();
     const sectionBuilderOrNull = sectionBuilderFunction(newSectionBuilder);

@@ -1,6 +1,7 @@
 import { ListBuilder, ListBuilderFunction } from './list-builder.js';
 import { SectionBuilder, SectionBuilderFunction } from './section-builder.js';
 import { compile } from './string-template-helpers.js';
+import { TableBuilder, TableBuilderFunction } from './table-builder.js';
 import { List, Paragraph, Section, Table } from './types.js';
 
 export type SectionContentBuilderFunction<
@@ -94,11 +95,6 @@ export class SectionContentBuilder<BuilderData extends Record<string, any> = {}>
     // return this;
   }
 
-  table(): SectionContentBuilder<BuilderData> {
-    // this.segments.push(table);
-    return this;
-  }
-
   list: (
     builderFunction: ListBuilderFunction<BuilderData>,
   ) => SectionContentBuilder<BuilderData> =
@@ -106,7 +102,14 @@ export class SectionContentBuilder<BuilderData extends Record<string, any> = {}>
       this.defineList<BuilderData, SectionContentBuilder<BuilderData>>(
         this, builderFunction
       );
-  
+
+  table: (
+    builderFunction: TableBuilderFunction<BuilderData>,
+  ) => SectionContentBuilder<BuilderData> =
+    (builderFunction) =>
+      this.defineTable<BuilderData, SectionContentBuilder<BuilderData>>(
+        this, builderFunction
+      );
 
   // list(
   //   listBuilderFunction: ListBuilderFunction<BuilderData>,
@@ -144,15 +147,30 @@ export class SectionContentBuilder<BuilderData extends Record<string, any> = {}>
     builder: Builder,
     listBuilderFunction: ListBuilderFunction<BuilderData>,
   ): Builder {
-      const newBuilder = new ListBuilder<BuilderData>();
-      const builderOrNull = listBuilderFunction(newBuilder);
-      if (builderOrNull !== undefined && builderOrNull !== null) {
-        builder.builderData.push({
-          type: 'list',
-          func: (data: BuilderData) => builderOrNull.build(data),
-        });
-      }
-      return builder;
+    const newBuilder = new ListBuilder<BuilderData>();
+    const builderOrNull = listBuilderFunction(newBuilder);
+    if (builderOrNull !== undefined && builderOrNull !== null) {
+      builder.builderData.push({
+        type: 'list',
+        func: (data: BuilderData) => builderOrNull.build(data),
+      });
+    }
+    return builder;
+  }
+
+  protected defineTable<BuilderData extends Record<string, any>, Builder extends (SectionBuilder<BuilderData> | SectionContentBuilder<BuilderData>)>(
+    builder: Builder,
+    tableBuilderFunction: TableBuilderFunction<BuilderData>,
+  ): Builder {
+    const newBuilder = new TableBuilder<BuilderData>();
+    const builderOrNull = tableBuilderFunction(newBuilder);
+    if (builderOrNull !== undefined && builderOrNull !== null) {
+      builder.builderData.push({
+        type: 'table',
+        func: (data: BuilderData) => builderOrNull.build(data),
+      });
+    }
+    return builder;
   }
 
   protected defineParagraph<BuilderData extends Record<string, any>, Builder extends (SectionBuilder<BuilderData> | SectionContentBuilder<BuilderData>)>(

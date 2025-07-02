@@ -3,6 +3,7 @@ import {
   SectionContentBuilder,
 } from './section-content-builder.js';
 import { compile } from './string-template-helpers.js';
+import { TableBuilderFunction } from './table-builder.js';
 import { Section } from './types.js';
 
 export type SectionBuilderFunction<
@@ -44,6 +45,14 @@ export class SectionBuilder<BuilderData extends Record<string, any> = {}> extend
   ) => SectionBuilder<BuilderData> =
     (builderFunction) =>
       this.defineList<BuilderData, SectionBuilder<BuilderData>>(
+        this, builderFunction
+      );
+
+  table: (
+    builderFunction: TableBuilderFunction<BuilderData>,
+  ) => SectionBuilder<BuilderData> =
+    (builderFunction) =>
+      this.defineTable<BuilderData, SectionBuilder<BuilderData>>(
         this, builderFunction
       );
 
