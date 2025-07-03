@@ -30,11 +30,13 @@ export type TableHeaderCell = {
 };
 
 export type TableRow = {
+  type: 'table-row';
   rowHeader?: TableHeaderCell;
   cells: TableCell[];
 };
 
 export type TableCell = {
+  type: 'table-cell';
   // FIXME
   // content: SegmentPart[];
 };
