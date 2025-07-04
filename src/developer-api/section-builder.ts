@@ -1,119 +1,124 @@
+import { ContentBuilderImpl, ContentBuilderImplListDatum, ContentBuilderImplParagraphDatum, ContentBuilderImplTableDatum } from './content-builder.js';
 import { ListBuilderFunction } from './list-builder.js';
 import {
   SectionContentBuilder,
+  SectionContentBuilderImpl,
+  SectionContentBuilderImplSectionDatum,
 } from './section-content-builder.js';
 import { compile } from './string-template-helpers.js';
 import { TableBuilderFunction } from './table-builder.js';
 import { Section } from './types.js';
 
 export type SectionBuilderFunction<
-  BuilderData extends Record<string, any> = {},
+  Params extends Record<string, any> = {},
 > = (
-  sectionBuilder: SectionBuilder<BuilderData>,
-) => SectionBuilder<BuilderData> | SectionContentBuilder<BuilderData> | undefined | null;
+  sectionBuilder: SectionBuilder<Params>,
+) => SectionBuilder<Params> | SectionContentBuilder<Params> | undefined | null;
 
-export class SectionBuilder<BuilderData extends Record<string, any> = {}> extends SectionContentBuilder<BuilderData> {
-  // partialSection: Partial<Section>;
-  // builderData: Partial<{
-  //   [K in keyof Section]:
-  //     | { type: 'value'; value: Section[K] }
-  //     | { type: 'builder'; func: (data: BuilderData) => Section[K] };
-  // }>;
-
-  private headingData: ((data: BuilderData) => string) | null;
-
-  constructor() {
-    // this.partialSection = {};
-    super();
-    this.headingData = null;
-  }
-
-  // heading<T extends Record<string, any>>(strings: TemplateStringsArray, ...keys: (keyof T)[]): SectionBuilder<BuilderData> {
+export interface SectionBuilder<Params extends Record<string, any> = {}> extends SectionContentBuilder<Params> {
+  paragraph(
+    builderFunction: (data: Params) => string,
+  ): SectionBuilder<Params>;
+  paragraph(
+    strings: TemplateStringsArray,
+    ...keys: (keyof Params)[]
+  ): SectionBuilder<Params>;
+  list(
+    builderFunction: ListBuilderFunction<Params>,
+  ): SectionBuilder<Params>;
+  table(
+    builderFunction: TableBuilderFunction<Params>,
+  ): SectionBuilder<Params>;
+  section(
+    builderFunction: SectionBuilderFunction<Params>,
+  ): SectionBuilder<Params>;
   heading(
     strings: TemplateStringsArray,
-    ...keys: (keyof BuilderData)[]
-  ): SectionContentBuilder<BuilderData> {
-    this.headingData = (data: BuilderData) => {
-      const headingStr = compile<BuilderData>(strings, ...keys);
-      return headingStr(data);
-    };
+    ...keys: (keyof Params)[]
+  ): SectionContentBuilder<Params>;
+}
+
+export type SectionBuilderImplHeadingDatum<Params extends Record<string, any>> = {
+  type: 'heading';
+  func: (data: Params) => string;
+};
+
+type SectionBuilderImplDatum<Params extends Record<string, any>> =
+  | ContentBuilderImplParagraphDatum<Params>
+  | ContentBuilderImplTableDatum<Params>
+  | ContentBuilderImplListDatum<Params>
+  | SectionContentBuilderImplSectionDatum<Params>
+  | SectionBuilderImplHeadingDatum<Params>;
+
+export class SectionBuilderImpl<Params extends Record<string, any> = {}> implements SectionBuilder<Params> {
+  private builderData: SectionBuilderImplDatum<Params>[];
+
+  constructor() {
+    this.builderData = [];
+  }
+
+  heading(
+    strings: TemplateStringsArray,
+    ...keys: (keyof Params)[]
+  ): SectionContentBuilder<Params> {
+    this.builderData.push({
+      type: 'heading',
+      func: (data: Params) => {
+        const headingStr = compile<Params>(strings, ...keys);
+        return headingStr(data);
+      },
+    });
     return this;
   }
 
   list: (
-    builderFunction: ListBuilderFunction<BuilderData>,
-  ) => SectionBuilder<BuilderData> =
+    builderFunction: ListBuilderFunction<Params>,
+  ) => SectionBuilder<Params> =
     (builderFunction) =>
-      this.defineList<BuilderData, SectionBuilder<BuilderData>>(
-        this, builderFunction
+      ContentBuilderImpl.defineList<Params, SectionBuilder<Params>>(
+        this, this.builderData.push, builderFunction
       );
 
   table: (
-    builderFunction: TableBuilderFunction<BuilderData>,
-  ) => SectionBuilder<BuilderData> =
+    builderFunction: TableBuilderFunction<Params>,
+  ) => SectionBuilder<Params> =
     (builderFunction) =>
-      this.defineTable<BuilderData, SectionBuilder<BuilderData>>(
-        this, builderFunction
+      ContentBuilderImpl.defineTable<Params, SectionBuilder<Params>>(
+        this, this.builderData.push, builderFunction
       );
 
   paragraph(
-    builderFunction: (data: BuilderData) => string,
-  ): SectionBuilder<BuilderData>;
+    builderFunction: (data: Params) => string,
+  ): SectionBuilder<Params>;
   paragraph(
     strings: TemplateStringsArray,
-    ...keys: (keyof BuilderData)[]
-  ): SectionBuilder<BuilderData>;
+    ...keys: (keyof Params)[]
+  ): SectionBuilder<Params>;
   paragraph(
     stringsOrBuilderFunction:
       | TemplateStringsArray
-      | ((data: BuilderData) => string),
-    ...keys: (keyof BuilderData)[]
-  ): SectionBuilder<BuilderData> {
-    return this.defineParagraph<BuilderData, SectionBuilder<BuilderData>>(
+      | ((data: Params) => string),
+    ...keys: (keyof Params)[]
+  ): SectionContentBuilder<Params> {
+    return ContentBuilderImpl.defineParagraph<Params, SectionContentBuilder<Params>>(
       this,
+      this.builderData.push,
       stringsOrBuilderFunction,
       ...keys
     );
   }
 
+  section: (
+    builderFunction: SectionBuilderFunction<Params>,
+  ) => SectionBuilder<Params> =
+    (builderFunction) =>
+      SectionContentBuilderImpl.defineSection<Params, SectionBuilder<Params>>(
+        this,
+        this.builderData.push,
+        builderFunction,
+      );
 
-  // heading<T>: CompileFunction<T extends Record<string, any>> = (strings, ...keys) => {
-  //   return compile<T>(strings, ...keys);
-  // }
-
-  // headingOld(heading: string): SectionBuilder {
-  //   this.partialSection.heading = heading;
-  //   return this;
-  // }
-
-  // content(contentBuilder: (SegmentsBuilderFunction | SectionBuilderFunction)): SectionBuilder {
-  //   this.partialSection.content = content;
-  //   return this;
-  // }
-
-  // segment(
-  //   segmentPartsBuilderFunction: SectionContentBuilderFunction<BuilderData>,
-  // ): SectionBuilder<BuilderData> {
-  //   if (!this.partialSection.content) {
-  //     this.partialSection.content = [];
-  //   }
-  //   const segmentPartsBuilder = new SectionContentBuilder<BuilderData>();
-  //   const segmentPartsBuilderOrNull =
-  //     segmentPartsBuilderFunction(segmentPartsBuilder);
-  //   if (
-  //     segmentPartsBuilderOrNull !== undefined &&
-  //     segmentPartsBuilderOrNull !== null
-  //   ) {
-  //     this.partialSection.content.push(segmentPartsBuilder.build());
-  //   }
-  //   return this;
-  // }
-
-  build(data: BuilderData): Section {
+  build(data: Params): Section {
     return { contents: [] };
-    // if (!this.partialSection.heading || !this.partialSection.content) {
-    //   throw new Error('Section must have a heading and content');
-    // }
-    // return this.partialSection as Section;
   }
 }

@@ -1,4 +1,4 @@
-import { SectionBuilder, SectionBuilderFunction } from './section-builder.js';
+import { SectionBuilderFunction, SectionBuilderImpl } from './section-builder.js';
 import { Section } from './types.js';
 
 export class PromptBuilder<BuilderData extends Record<string, any> = {}> {
@@ -13,11 +13,11 @@ export class PromptBuilder<BuilderData extends Record<string, any> = {}> {
   section(
     sectionBuilderFunction: SectionBuilderFunction<BuilderData>,
   ): PromptBuilder<BuilderData> {
-    const newSectionBuilder = new SectionBuilder<BuilderData>();
-    const sectionBuilderOrNull = sectionBuilderFunction(newSectionBuilder);
+    const newBuilder = new SectionBuilderImpl<BuilderData>();
+    const sectionBuilderOrNull = sectionBuilderFunction(newBuilder);
     if (sectionBuilderOrNull !== undefined && sectionBuilderOrNull !== null) {
       this.sectionData.push({
-        func: (data) => sectionBuilderOrNull.build(data),
+        func: (data) => newBuilder.build(data),
       })
     }
     return this;
