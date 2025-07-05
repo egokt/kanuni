@@ -1,26 +1,28 @@
-import { PromptBuilder } from '../../../src/index.js';
+import { Kanuni } from '../../../src/index.js';
 
-const p = new PromptBuilder<{ title: string }>()
-  .section((s) => s
-    .heading`Section ${'title'}`
+const p = Kanuni.newQuery<{ title: string }>()
+  .prompt(p => p
     .section((s) => s
-      .heading`Subsection 1.1`
+      .heading`Section ${'title'}`
       .section((s) => s
-        .paragraph`some paragraph`
-        .heading`some heading`
-        // @ts-expect-error
-        .heading`another heading for the same section - error`
+        .heading`Subsection 1.1`
+        .section((s) => s
+          .paragraph`some paragraph`
+          .heading`some heading`
+          // @ts-expect-error
+          .heading`another heading for the same section - error`
+        )
+        .paragraph`This is the introduction ${'title'} section.`
+        .paragraph((data) => `This is the introduction ${data.title} section.`)
+        .paragraph`It may include a document if the condition is met.`
+        .list((l) => l
+          .item`List item 1`
+          .item`List item 2`
+        )
       )
-      .paragraph`This is the introduction ${'title'} section.`
-      .paragraph((data) => `This is the introduction ${data.title} section.`)
-      .paragraph`It may include a document if the condition is met.`
-      .list((l) => l
-        .item`List item 1`
-        .item`List item 2`
+      // section without a paragraph
+      .section(s => s
+        .paragraph`This is the second section ${'title'}`
       )
-    )
-    // section without a paragraph
-    .section(s => s
-      .paragraph`This is the second section ${'title'}`
     )
   );

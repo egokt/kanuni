@@ -1,7 +1,19 @@
 import { SectionBuilderFunction, SectionBuilderImpl } from './section-builder.js';
-import { Section } from './types.js';
+import { Prompt, Section } from './types.js';
 
-export class PromptBuilder<BuilderData extends Record<string, any> = {}> {
+export type PromptBuilderFunction<
+  Params extends Record<string, any> = {},
+> = (
+  builder: PromptBuilder<Params>,
+) => PromptBuilder<Params> | undefined | null;
+
+export interface PromptBuilder<Params extends Record<string, any> = {}> {
+  section(
+    builderFunction: SectionBuilderFunction<Params>,
+  ): PromptBuilder<Params>;
+}
+
+export class PromptBuilderImpl<BuilderData extends Record<string, any> = {}> {
   private sectionData: (
     { func: (data: BuilderData) => Section }
   )[];
@@ -23,8 +35,11 @@ export class PromptBuilder<BuilderData extends Record<string, any> = {}> {
     return this;
   }
 
-  build(data: BuilderData) {
+  build(data: BuilderData): Prompt {
     // FIXME
-    return '';
+    return {
+      type: 'prompt',
+      contents: [],
+    }
   }
 }

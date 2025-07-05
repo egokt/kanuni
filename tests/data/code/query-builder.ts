@@ -1,5 +1,6 @@
+import { Kanuni } from "../../../src";
 
-new QueryBuilder()
+Kanuni.newQuery<{ title: string }>()
   .prompt(p => p
     .section(s => s
       .heading`Section ${'title'}`

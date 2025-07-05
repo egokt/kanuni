@@ -1,1 +1,1 @@
-export { PromptBuilder } from './developer-api/index.js';
+export { Kanuni } from './kanuni.js';
