@@ -17,6 +17,10 @@ const p = new PromptBuilder<{ title: string }>()
       .list((l) => l
         .item`List item 1`
         .item`List item 2`
-      ),
-    ),
+      )
+    )
+    // section without a paragraph
+    .section(s => s
+      .paragraph`This is the second section ${'title'}`
+    )
   );

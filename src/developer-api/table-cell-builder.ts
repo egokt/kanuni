@@ -1,4 +1,6 @@
-import { TableRowBuilder } from "./table-row-builder.js";
+import { ContentBuilder, ContentBuilderImpl, ContentBuilderImplListDatum, ContentBuilderImplParagraphDatum, ContentBuilderImplTableDatum } from "./content-builder.js";
+import { ListBuilderFunction } from "./list-builder.js";
+import { TableBuilderFunction } from "./table-builder.js";
 import { TableCell } from "./types.js";
 
 export type TableCellBuilderFunction<
@@ -7,16 +9,72 @@ export type TableCellBuilderFunction<
   builder: TableCellBuilder<BuilderData>,
 ) => TableCellBuilder<BuilderData> | undefined | null;
 
-export class TableCellBuilder<BuilderData extends Record<string, any> = {}> {
-  private builderData: (
-    { func: (data: BuilderData) => TableCell }
-  )[];
+export interface TableCellBuilder<Params extends Record<string, any> = {}> extends ContentBuilder<Params> {
+  paragraph(
+    builderFunction: (data: Params) => string,
+  ): TableCellBuilder<Params>;
+  paragraph(
+    strings: TemplateStringsArray,
+    ...keys: (keyof Params)[]
+  ): TableCellBuilder<Params>;
+  list(
+    builderFunction: ListBuilderFunction<Params>,
+  ): TableCellBuilder<Params>;
+  table(
+    builderFunction: TableBuilderFunction<Params>,
+  ): TableCellBuilder<Params>;
+}
+
+type TableCellBuilderImplDatum<Params extends Record<string, any>> =
+  | ContentBuilderImplParagraphDatum<Params>
+  | ContentBuilderImplTableDatum<Params>
+  | ContentBuilderImplListDatum<Params>;
+
+export class TableCellBuilderImpl<Params extends Record<string, any> = {}> implements TableCellBuilder<Params> {
+  private builderData: TableCellBuilderImplDatum<Params>[];
 
   constructor() {
     this.builderData = [];
   }
 
-  build(data: BuilderData): TableCell {
+  paragraph(
+    builderFunction: (data: Params) => string,
+  ): ContentBuilder<Params>;
+  paragraph(
+    strings: TemplateStringsArray,
+    ...keys: (keyof Params)[]
+  ): ContentBuilder<Params>;
+  paragraph(
+    stringsOrBuilderFunction:
+      | TemplateStringsArray
+      | ((data: Params) => string),
+    ...keys: (keyof Params)[]
+  ): ContentBuilder<Params> {
+    return ContentBuilderImpl.defineParagraph<Params, ContentBuilder<Params>>(
+      this,
+      this.builderData.push,
+      stringsOrBuilderFunction,
+      ...keys
+    );
+  }
+
+  list: (
+    builderFunction: ListBuilderFunction<Params>,
+  ) => ContentBuilder<Params> =
+    (builderFunction) =>
+      ContentBuilderImpl.defineList<Params, ContentBuilder<Params>>(
+        this, this.builderData.push, builderFunction
+      );
+
+  table: (
+    builderFunction: TableBuilderFunction<Params>,
+  ) => ContentBuilder<Params> =
+    (builderFunction) =>
+      ContentBuilderImpl.defineTable<Params, ContentBuilder<Params>>(
+        this, this.builderData.push, builderFunction
+      );
+
+  build(data: Params): TableCell {
     return {
       type: 'table-cell',
       // FIXME

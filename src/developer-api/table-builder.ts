@@ -1,4 +1,4 @@
-import { TableRowBuilder } from "./table-row-builder.js";
+import { TableRowBuilder, TableRowBuilderImpl } from "./table-row-builder.js";
 import { Table, TableRow } from "./types.js";
 
 export type TableBuilderFunction<
@@ -7,9 +7,15 @@ export type TableBuilderFunction<
   builder: TableBuilder<BuilderData>,
 ) => TableBuilder<BuilderData> | undefined | null;
 
-export class TableBuilder<BuilderData extends Record<string, any> = {}> {
+export interface TableBuilder<Params extends Record<string, any> = {}> {
+  row(
+    builderFunction: (builder: TableRowBuilder<Params>) => TableRowBuilder<Params> | undefined | null,
+  ): TableBuilder<Params>;
+}
+
+export class TableBuilderImpl<Params extends Record<string, any> = {}> implements TableBuilder<Params> {
   private builderData: (
-    { func: (data: BuilderData) => TableRow }
+    { func: (data: Params) => TableRow }
   )[];
 
   constructor() {
@@ -17,19 +23,19 @@ export class TableBuilder<BuilderData extends Record<string, any> = {}> {
   }
 
   row(
-    builderFunction: (builder: TableRowBuilder<BuilderData>) => TableRowBuilder<BuilderData> | undefined | null,
-  ): TableBuilder<BuilderData> {
-    const newBuilder = new TableRowBuilder<BuilderData>();
+    builderFunction: (builder: TableRowBuilder<Params>) => TableRowBuilder<Params> | undefined | null,
+  ): TableBuilder<Params> {
+    const newBuilder = new TableRowBuilderImpl<Params>();
     const builderOrNull = builderFunction(newBuilder);
     if (builderOrNull !== undefined && builderOrNull !== null) {
       this.builderData.push({
-        func: (data: BuilderData) => builderOrNull.build(data),
+        func: (data: Params) => newBuilder.build(data),
       });
     }
     return this;
   }
 
-  build(data: BuilderData): Table {
+  build(data: Params): Table {
     return {
       type: 'table',
       // FIXME

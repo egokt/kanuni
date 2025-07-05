@@ -2,7 +2,7 @@ import { ListBuilder, ListBuilderFunction } from './list-builder.js';
 import { SectionBuilder } from './section-builder.js';
 import { SectionContentBuilder } from './section-content-builder.js';
 import { compile } from './string-template-helpers.js';
-import { TableBuilder, TableBuilderFunction } from './table-builder.js';
+import { TableBuilderFunction, TableBuilderImpl } from './table-builder.js';
 import { List, Paragraph, Section, Table } from './types.js';
 
 export type ContentBuilderFunction<
@@ -116,12 +116,12 @@ export class ContentBuilderImpl<Params extends Record<string, any> = {}> impleme
     pushToBuilderData: (builderData: ContentBuilderImplTableDatum<Params>) => void,
     tableBuilderFunction: TableBuilderFunction<Params>,
   ): Builder {
-    const newBuilder = new TableBuilder<Params>();
+    const newBuilder = new TableBuilderImpl<Params>();
     const builderOrNull = tableBuilderFunction(newBuilder);
     if (builderOrNull !== undefined && builderOrNull !== null) {
       pushToBuilderData({
         type: 'table',
-        func: (data: Params) => builderOrNull.build(data),
+        func: (data: Params) => newBuilder.build(data),
       });
     }
     return builder;
