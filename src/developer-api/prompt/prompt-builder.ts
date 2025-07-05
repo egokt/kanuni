@@ -13,9 +13,9 @@ export interface PromptBuilder<Params extends Record<string, any> = {}> {
   ): PromptBuilder<Params>;
 }
 
-export class PromptBuilderImpl<BuilderData extends Record<string, any> = {}> {
+export class PromptBuilderImpl<Params extends Record<string, any> = {}> {
   private sectionData: (
-    { func: (data: BuilderData) => Section }
+    { func: (data: Params) => Section }
   )[];
 
   constructor() {
@@ -23,9 +23,9 @@ export class PromptBuilderImpl<BuilderData extends Record<string, any> = {}> {
   }
 
   section(
-    sectionBuilderFunction: SectionBuilderFunction<BuilderData>,
-  ): PromptBuilder<BuilderData> {
-    const newBuilder = new SectionBuilderImpl<BuilderData>();
+    sectionBuilderFunction: SectionBuilderFunction<Params>,
+  ): PromptBuilder<Params> {
+    const newBuilder = new SectionBuilderImpl<Params>();
     const sectionBuilderOrNull = sectionBuilderFunction(newBuilder);
     if (sectionBuilderOrNull !== undefined && sectionBuilderOrNull !== null) {
       this.sectionData.push({
@@ -35,7 +35,7 @@ export class PromptBuilderImpl<BuilderData extends Record<string, any> = {}> {
     return this;
   }
 
-  build(data: BuilderData): Prompt {
+  build(data: Params): Prompt {
     // FIXME
     return {
       type: 'prompt',

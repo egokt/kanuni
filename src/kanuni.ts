@@ -1,4 +1,4 @@
-import { QueryBuilder, QueryBuilderImpl } from "./developer-api/query-builder.js";
+import { QueryBuilder, QueryBuilderImpl } from "./developer-api/index.js";
 
 export class Kanuni {
   static newQuery<Params extends Record<string, any>>(): QueryBuilder<Params> {

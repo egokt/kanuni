@@ -1,1 +1,2 @@
-export { PromptBuilder } from './prompt-builder.js';
+export { PromptBuilder, PromptBuilderImpl, PromptBuilderFunction } from './prompt-builder.js';
+export type { Prompt } from './types.js';

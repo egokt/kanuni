@@ -9,14 +9,14 @@ Kanuni.newQuery<{ title: string }>()
     // this is a placeholder for the section that will include the chat history
     // it is optional, mainly to be used for customizing the heading when
     // formatting as a single text prompt
-    .contextSection(c => c
+    .memorySection(c => c
       .heading`Chat history Section`
     )
   )
-  .context<'user' | 'assistant'>(c => c
-    .message('user', 'This is a user message')
-    .message('assistant', 'This is an assistant message')
-    .tool(
+  .memory<'user' | 'assistant'>(m => m
+    .message('user', (data) => 'This is a user message')
+    .message('assistant', (data) => 'This is an assistant message')
+    .toolInvocation(
       'toolName',
       { param1: 'value1', param2: 'value2' }, // jsonRPC?
       'The output of the tool', // should this be in json or just a string?
