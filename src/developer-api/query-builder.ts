@@ -1,10 +1,10 @@
-import { PromptBuilderFunction, PromptBuilderImpl, Prompt } from "./prompt/index.js";
+import { SectionBuilderFunction, SectionBuilderImpl, Section } from "./prompt/index.js";
 import { Memory } from "./memory/index.js";
 import { MemoryBuilderFunction, MemoryBuilderImpl } from "./memory/memory-builder.js";
 
 export interface QueryBuilder<Params extends Record<string, any> = {}> {
   prompt(
-    promptBuilderFunction: PromptBuilderFunction<Params>,
+    promptBuilderFunction: SectionBuilderFunction<Params>,
   ): QueryBuilder<Params>;
   memory<Role extends string>(
     memoryBuilderFunction: MemoryBuilderFunction<Params, Role>,
@@ -12,7 +12,7 @@ export interface QueryBuilder<Params extends Record<string, any> = {}> {
 }
 
 export class QueryBuilderImpl<Params extends Record<string, any> = {}> implements QueryBuilder<Params> {
-  private promptData: ((data: Params) => Prompt) | null;
+  private promptData: ((data: Params) => Section) | null;
   private memoryData: ((data: Params) => Memory) | null;
 
   constructor() {
@@ -21,9 +21,9 @@ export class QueryBuilderImpl<Params extends Record<string, any> = {}> implement
   }
 
   prompt(
-    promptBuilderFunction: PromptBuilderFunction<Params>,
+    promptBuilderFunction: SectionBuilderFunction<Params>,
   ): QueryBuilder<Params> {
-    const newBuilder = new PromptBuilderImpl<Params>();
+    const newBuilder = new SectionBuilderImpl<Params>();
     const sectionBuilderOrNull = promptBuilderFunction(newBuilder);
     if (sectionBuilderOrNull !== undefined && sectionBuilderOrNull !== null) {
       this.promptData = (data) => newBuilder.build(data);

@@ -1,2 +1,2 @@
-export { PromptBuilder, PromptBuilderImpl, PromptBuilderFunction } from './prompt-builder.js';
-export type { Prompt } from './types.js';
+export { SectionBuilder, SectionBuilderFunction, SectionBuilderImpl } from './section-builder.js';
+export type { Section } from './types.js';

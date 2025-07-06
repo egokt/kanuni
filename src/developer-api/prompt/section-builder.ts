@@ -36,6 +36,9 @@ export interface SectionBuilder<Params extends Record<string, any> = {}> extends
     strings: TemplateStringsArray,
     ...keys: (keyof Params)[]
   ): SectionContentBuilder<Params>;
+  memorySection: (
+    builderFunction: SectionBuilderFunction<Params>,
+  ) => SectionBuilder<Params>;
 }
 
 export type SectionBuilderImplHeadingDatum<Params extends Record<string, any>> = {
@@ -116,6 +119,17 @@ export class SectionBuilderImpl<Params extends Record<string, any> = {}> impleme
         this,
         this.builderData.push,
         builderFunction,
+      );
+
+  memorySection: (
+    builderFunction: SectionBuilderFunction<Params>,
+  ) => SectionBuilder<Params> =
+    (builderFunction) =>
+      SectionContentBuilderImpl.defineSection<Params, SectionBuilder<Params>>(
+        this,
+        this.builderData.push,
+        builderFunction,
+        true,
       );
 
   build(data: Params): Section {

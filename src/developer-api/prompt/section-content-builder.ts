@@ -10,28 +10,32 @@ export type SectionContentBuilderFunction<
   builder: SectionContentBuilder<BuilderData>,
 ) => SectionContentBuilder<BuilderData> | undefined | null;
 
-export interface SectionContentBuilder<BuilderData extends Record<string, any> = {}> extends ContentBuilder<BuilderData> {
+export interface SectionContentBuilder<Params extends Record<string, any> = {}> extends ContentBuilder<Params> {
   paragraph(
-    builderFunction: (data: BuilderData) => string,
-  ): SectionContentBuilder<BuilderData>;
+    builderFunction: (data: Params) => string,
+  ): SectionContentBuilder<Params>;
   paragraph(
     strings: TemplateStringsArray,
-    ...keys: (keyof BuilderData)[]
-  ): SectionContentBuilder<BuilderData>;
+    ...keys: (keyof Params)[]
+  ): SectionContentBuilder<Params>;
   list(
-    builderFunction: ListBuilderFunction<BuilderData>,
-  ): SectionContentBuilder<BuilderData>;
+    builderFunction: ListBuilderFunction<Params>,
+  ): SectionContentBuilder<Params>;
   table(
-    builderFunction: TableBuilderFunction<BuilderData>,
-  ): SectionContentBuilder<BuilderData>;
+    builderFunction: TableBuilderFunction<Params>,
+  ): SectionContentBuilder<Params>;
   section(
-    builderFunction: SectionBuilderFunction<BuilderData>,
-  ): SectionContentBuilder<BuilderData>;
+    builderFunction: SectionBuilderFunction<Params>,
+  ): SectionContentBuilder<Params>;
+  memorySection: (
+    builderFunction: SectionBuilderFunction<Params>,
+  ) => SectionContentBuilder<Params>;
 }
 
 export type SectionContentBuilderImplSectionDatum<Params extends Record<string, any>> = {
   type: 'section';
   func: (data: Params) => Section;
+  isMemorySection?: boolean;
 };
 
 type SectionContentBuilderImplDatum<Params extends Record<string, any>> =
@@ -94,10 +98,22 @@ export class SectionContentBuilderImpl<Params extends Record<string, any> = {}> 
         builderFunction,
       );
 
+  memorySection: (
+    builderFunction: SectionBuilderFunction<Params>,
+  ) => SectionContentBuilder<Params> =
+    (builderFunction) =>
+      SectionContentBuilderImpl.defineSection<Params, SectionContentBuilder<Params>>(
+        this,
+        this.builderData.push,
+        builderFunction,
+        true,
+      );
+
   static defineSection<Params extends Record<string, any>, Builder extends (SectionBuilder<Params> | SectionContentBuilder<Params>)> (
     builder: Builder,
     pushToBuilderData: (builderData: SectionContentBuilderImplSectionDatum<Params>) => void,
     builderFunction: SectionBuilderFunction<Params>,
+    isMemorySection?: boolean,
   ): Builder {
     const newBuilder = new SectionBuilderImpl<Params>();
     const builderOrNull = builderFunction(newBuilder);
@@ -105,6 +121,7 @@ export class SectionContentBuilderImpl<Params extends Record<string, any> = {}> 
       pushToBuilderData({
         type: 'section',
         func: (data: Params) => newBuilder.build(data),
+        isMemorySection,
       });
     }
     return builder;
