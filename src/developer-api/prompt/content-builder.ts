@@ -39,7 +39,7 @@ export type ContentBuilderImplTableDatum<Params extends Record<string, any>> = {
 
 export type ContentBuilderImplListDatum<Params extends Record<string, any>> = {
   type: 'list';
-  func: (data: Params) => List;
+  func: (data: Params) => List | null;
 };
 
 type ContentBuilderImplDatum<Params extends Record<string, any>> =
@@ -80,7 +80,9 @@ export class ContentBuilderImpl<Params extends Record<string, any> = {}> impleme
   ) => ContentBuilder<Params> =
     (builderFunction) =>
       ContentBuilderImpl.defineList<Params, ContentBuilder<Params>>(
-        this, this.builderData.push, builderFunction
+        this,
+        this.builderData.push,
+        builderFunction,
       );
 
   table: (
@@ -100,15 +102,28 @@ export class ContentBuilderImpl<Params extends Record<string, any> = {}> impleme
     pushToBuilderData: (builderData: ContentBuilderImplListDatum<Params>) => void,
     listBuilderFunction: ListBuilderFunction<Params>,
   ): Builder {
-    const newBuilder = new ListBuilder<Params>();
-    const builderOrNull = listBuilderFunction(newBuilder);
-    if (builderOrNull !== undefined && builderOrNull !== null) {
-      pushToBuilderData({
-        type: 'list',
-        func: (data: Params) => builderOrNull.build(data),
-      });
-    }
+    pushToBuilderData({
+      type: 'list',
+      func: (data: Params) => {
+        const newBuilder = new ListBuilder<Params>();
+        const builderOrNull = listBuilderFunction(newBuilder, data);
+        if (builderOrNull !== undefined && builderOrNull !== null) {
+          return builderOrNull.build(data);
+        } else {
+          return null;
+        }
+      },
+    })
     return builder;
+    // const newBuilder = new ListBuilder<Params>();
+    // const builderOrNull = listBuilderFunction(newBuilder, data);
+    // if (builderOrNull !== undefined && builderOrNull !== null) {
+    //   pushToBuilderData({
+    //     type: 'list',
+    //     func: (data: Params) => builderOrNull.build(data),
+    //   });
+    // }
+    // return builder;
   }
 
   static defineTable<Params extends Record<string, any>, Builder extends (SectionBuilder<Params> | SectionContentBuilder<Params> | ContentBuilder<Params>)>(
