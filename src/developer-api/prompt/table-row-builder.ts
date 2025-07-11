@@ -36,6 +36,8 @@ export class TableRowBuilderImpl<Params extends Record<string, any> = {}> implem
   }
 
   build(data: Params): TableRow {
+    // FIXME
+    data;
     return {
       type: 'table-row',
       // FIXME

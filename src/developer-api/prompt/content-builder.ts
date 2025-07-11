@@ -69,7 +69,7 @@ export class ContentBuilderImpl<Params extends Record<string, any> = {}> impleme
   ): ContentBuilder<Params> {
     return ContentBuilderImpl.defineParagraph<Params, ContentBuilder<Params>>(
       this,
-      this.builderData.push,
+      this.builderData.push.bind(this.builderData),
       stringsOrBuilderFunction,
       ...keys
     );
@@ -81,7 +81,7 @@ export class ContentBuilderImpl<Params extends Record<string, any> = {}> impleme
     (builderFunction) =>
       ContentBuilderImpl.defineList<Params, ContentBuilder<Params>>(
         this,
-        this.builderData.push,
+        this.builderData.push.bind(this.builderData),
         builderFunction,
       );
 
@@ -90,11 +90,32 @@ export class ContentBuilderImpl<Params extends Record<string, any> = {}> impleme
   ) => ContentBuilder<Params> =
     (builderFunction) =>
       ContentBuilderImpl.defineTable<Params, ContentBuilder<Params>>(
-        this, this.builderData.push, builderFunction
+        this,
+        this.builderData.push.bind(this.builderData),
+        builderFunction,
       );
 
   build(data: Params): Section {
-    return { contents: [] };
+    const contents = this.builderData
+      .map((datum) => {
+        switch (datum.type) {
+          case 'paragraph':
+            return datum.func(data);
+          case 'list': {
+            const list = datum.func(data);
+            return list ? list : null;
+          }
+          case 'table':
+            return datum.func(data);
+          default:
+            return null;
+        }
+      })
+      .filter((item) => item !== null);
+    return {
+      type: 'section',
+      contents
+    };
   }
 
   static defineList<Params extends Record<string, any>, Builder extends (SectionBuilder<Params> | SectionContentBuilder<Params> | ContentBuilder<Params>)>(

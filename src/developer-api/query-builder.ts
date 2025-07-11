@@ -44,6 +44,9 @@ export class QueryBuilderImpl<Params extends Record<string, any> = {}> implement
 
   build(data: Params) {
     // FIXME
+    this.promptData;
+    this.memoryData;
+    data;
     return '';
   }
 }

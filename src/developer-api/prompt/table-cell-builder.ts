@@ -52,7 +52,7 @@ export class TableCellBuilderImpl<Params extends Record<string, any> = {}> imple
   ): ContentBuilder<Params> {
     return ContentBuilderImpl.defineParagraph<Params, ContentBuilder<Params>>(
       this,
-      this.builderData.push,
+      this.builderData.push.bind(this.builderData),
       stringsOrBuilderFunction,
       ...keys
     );
@@ -63,7 +63,9 @@ export class TableCellBuilderImpl<Params extends Record<string, any> = {}> imple
   ) => ContentBuilder<Params> =
     (builderFunction) =>
       ContentBuilderImpl.defineList<Params, ContentBuilder<Params>>(
-        this, this.builderData.push, builderFunction
+        this,
+        this.builderData.push.bind(this.builderData),
+        builderFunction,
       );
 
   table: (
@@ -71,10 +73,14 @@ export class TableCellBuilderImpl<Params extends Record<string, any> = {}> imple
   ) => ContentBuilder<Params> =
     (builderFunction) =>
       ContentBuilderImpl.defineTable<Params, ContentBuilder<Params>>(
-        this, this.builderData.push, builderFunction
+        this,
+        this.builderData.push.bind(this.builderData),
+        builderFunction,
       );
 
   build(data: Params): TableCell {
+    // FIXME
+    data;
     return {
       type: 'table-cell',
       // FIXME

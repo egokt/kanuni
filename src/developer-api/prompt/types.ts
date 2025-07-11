@@ -1,5 +1,6 @@
 // This is one part in the prompt
 export type Section = {
+  type: 'section';
   heading?: string;
   contents: (ContentPart | Section)[];
 };

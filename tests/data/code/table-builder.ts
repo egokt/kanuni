@@ -1,6 +1,6 @@
 import { Kanuni } from '../../../src/index.js';
 
-const p = Kanuni.newQuery<{ title: string }>()
+Kanuni.newQuery<{ title: string }>()
   .prompt(p => p
     .table((t) => t
       .row((r) => r

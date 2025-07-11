@@ -1,4 +1,4 @@
-import { Kanuni } from "../../../src";
+import { Kanuni } from "../../../src/index.js";
 
 Kanuni.newQuery<{ title: string }>()
   .prompt(p => p
@@ -13,12 +13,13 @@ Kanuni.newQuery<{ title: string }>()
     )
   )
   .memory<'user' | 'assistant'>(m => m
-    .message('user', (data) => 'This is a user message')
-    .message('assistant', (data) => 'This is an assistant message')
-    .toolInvocation(
-      'toolName',
-      { param1: 'value1', param2: 'value2' }, // jsonRPC?
-      'The output of the tool', // should this be in json or just a string?
-      'success', // TODO: result status, e.g. 'success' or 'error', - add error message if status is 'error' (optional?)
-    )
+    .message('user', () => 'This is a user message')
+    .message('assistant', () => 'This is an assistant message')
+    // This design is in progress.
+    // .toolInvocation(
+    //   'toolName',
+    //   { param1: 'value1', param2: 'value2' }, // jsonRPC?
+    //   'The output of the tool', // should this be in json or just a string?
+    //   'success', // TODO: result status, e.g. 'success' or 'error', - add error message if status is 'error' (optional?)
+    // )
   )

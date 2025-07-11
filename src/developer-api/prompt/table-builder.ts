@@ -36,6 +36,8 @@ export class TableBuilderImpl<Params extends Record<string, any> = {}> implement
   }
 
   build(data: Params): Table {
+    // FIXME
+    data;
     return {
       type: 'table',
       // FIXME

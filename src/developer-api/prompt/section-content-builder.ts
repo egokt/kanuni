@@ -128,7 +128,12 @@ export class SectionContentBuilderImpl<Params extends Record<string, any> = {}> 
   }
 
   build(data: Params): Section {
-    return { contents: [] };
+    // FIXME
+    data;
+    return {
+      type: 'section',
+      contents: []
+    };
   }
 }
 

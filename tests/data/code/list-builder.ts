@@ -1,6 +1,6 @@
 import { Kanuni } from '../../../src/index.js';
 
-const q = Kanuni.newQuery<{ title: string, exampleItems: [string, string[]][] }>()
+Kanuni.newQuery<{ title: string, exampleItems: [string, string[]][] }>()
   .prompt(p => p
     .list((l, data) => l
       .item`List item 1 with title: ${'title'}`

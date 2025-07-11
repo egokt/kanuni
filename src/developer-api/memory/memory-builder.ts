@@ -43,6 +43,7 @@ export class MemoryBuilderImpl<Params extends Record<string, any> = {}, Role ext
 
   build(data: Params): Memory {
     // FIXME
+    data;
     return {
       type: 'memory',
       contents: [],

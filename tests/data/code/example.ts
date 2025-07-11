@@ -1,4 +1,4 @@
-import { Kanuni } from "../../../src";
+import { Kanuni } from "../../../src/index.js";
 
 Kanuni.newQuery<{
   aiSuggestedContext: string,

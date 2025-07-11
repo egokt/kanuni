@@ -133,6 +133,11 @@ export class SectionBuilderImpl<Params extends Record<string, any> = {}> impleme
       );
 
   build(data: Params): Section {
-    return { contents: [] };
+    // FIXME
+    data;
+    return {
+      type: 'section',
+      contents: []
+    };
   }
 }
