@@ -79,11 +79,11 @@ export class TableCellBuilderImpl<Params extends Record<string, any> = {}> imple
       );
 
   build(data: Params): TableCell {
-    // FIXME
-    data;
+    const contents = this.builderData.map((datum) => datum.func(data))
+      .filter((datum) => datum !== undefined && datum !== null);
     return {
       type: 'table-cell',
-      // FIXME
+      contents,
     };
   }
 }

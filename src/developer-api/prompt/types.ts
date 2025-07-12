@@ -38,8 +38,7 @@ export type TableRow = {
 
 export type TableCell = {
   type: 'table-cell';
-  // FIXME
-  // content: SegmentPart[];
+  contents: ContentPart[];
 };
 
 export type List = {
