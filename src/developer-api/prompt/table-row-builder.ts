@@ -3,10 +3,10 @@ import { TableCellBuilder, TableCellBuilderImpl } from "./table-cell-builder.js"
 import { Paragraph, TableCell, TableRow } from "./types.js";
 
 export type TableRowBuilderFunction<
-  BuilderData extends Record<string, any> = {},
+  Params extends Record<string, any> = {},
 > = (
-  builder: TableRowBuilder<BuilderData>,
-) => TableRowBuilder<BuilderData> | undefined | null;
+  builder: TableRowBuilder<Params>,
+) => TableRowBuilderWoHeader<Params> | undefined | null;
 
 export interface TableRowBuilder<Params extends Record<string, any> = {}> {
   cell(

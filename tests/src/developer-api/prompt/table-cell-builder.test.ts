@@ -40,22 +40,21 @@ describe('TableCellBuilderImpl', () => {
     }
   });
 
-  // FIXME: Enable once the table builder is implemented
-  // it('builds a cell with a nested table', () => {
-  //   const builder = new TableCellBuilderImpl<{ val: string }>();
-  //   builder.table(t => t
-  //     .row(r => r
-  //       .cell(c => c.paragraph(data => `Cell: ${data.val}`))
-  //     )
-  //   );
-  //   const result = builder.build({ val: 'Y' });
-  //   const table = result.contents.find(c => c.type === 'table');
-  //   expect(table).toBeDefined();
-  //   if (table && table.type === 'table') {
-  //     expect(table.rows.length).toBe(1);
-  //     expect(table.rows[0].cells[0].contents[0]).toEqual({ type: 'paragraph', content: 'Cell: Y' });
-  //   }
-  // });
+  it('builds a cell with a nested table', () => {
+    const builder = new TableCellBuilderImpl<{ val: string }>();
+    builder.table(t => t
+      .row(r => r
+        .cell(c => c.paragraph(data => `Cell: ${data.val}`))
+      )
+    );
+    const result = builder.build({ val: 'Y' });
+    const table = result.contents.find(c => c.type === 'table');
+    expect(table).toBeDefined();
+    if (table && table.type === 'table') {
+      expect(table.rows.length).toBe(1);
+      expect(table.rows[0].cells[0].contents[0]).toEqual({ type: 'paragraph', content: 'Cell: Y' });
+    }
+  });
 
   it('builds a cell with mixed content', () => {
     const builder = new TableCellBuilderImpl<{ foo: string }>();
