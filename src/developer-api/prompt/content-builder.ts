@@ -3,6 +3,7 @@ import { SectionBuilder } from './section-builder.js';
 import { SectionContentBuilder } from './section-content-builder.js';
 import { compile } from './string-template-helpers.js';
 import { TableBuilderFunction, TableBuilderImpl } from './table-builder.js';
+import { TableRowBuilder } from './table-row-builder.js';
 import { List, Paragraph, Section, Table } from './types.js';
 
 export type ContentBuilderFunction<
@@ -163,7 +164,7 @@ export class ContentBuilderImpl<Params extends Record<string, any> = {}> impleme
     return builder;
   }
 
-  static defineParagraph<Params extends Record<string, any>, Builder extends (SectionBuilder<Params> | SectionContentBuilder<Params> | ContentBuilder<Params>)>(
+  static defineParagraph<Params extends Record<string, any>, Builder extends (SectionBuilder<Params> | SectionContentBuilder<Params> | ContentBuilder<Params> | TableRowBuilder<Params>)>(
     builder: Builder,
     pushToBuilderData: (builderData: ContentBuilderImplParagraphDatum<Params>) => void,
     stringsOrBuilderFunction:

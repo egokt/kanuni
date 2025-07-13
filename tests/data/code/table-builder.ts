@@ -36,10 +36,14 @@ Kanuni.newQuery<{ title: string }>()
           )
           .table(t => t
             .row(r => r
+              .header`Row header with title: ${'title'}`
               .cell(c => c
                 .paragraph`Nested Cell 1 with title: ${'title'}`
                 .paragraph((data) => `Nested Cell 1 with title: ${data.title}`)
               )
+              // should not allow a second call to header in the same row
+              //@ts-expect-error
+              .header`Row header with title: ${'title'}`
             )
             .row(r => r
               .cell(c => c

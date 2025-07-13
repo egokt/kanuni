@@ -27,7 +27,8 @@ export type Table = {
 };
 
 export type TableHeaderCell = {
-  content: Paragraph;
+  type: 'table-header-cell';
+  contents: Paragraph;
 };
 
 export type TableRow = {
