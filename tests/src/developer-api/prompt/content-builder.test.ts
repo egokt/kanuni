@@ -1,4 +1,5 @@
 import { ContentBuilderImpl } from '../../../../src/developer-api/prompt/content-builder.js';
+import { Paragraph } from '../../../../src/developer-api/prompt/types.js';
 
 describe('content-builder', () => {
   it('should build a paragraph using a function', () => {
@@ -28,17 +29,17 @@ describe('content-builder', () => {
     }
   });
 
-  // TODO: Enable this test once the table builder is implemented
-  // it('should build a table', () => {
-  //   const builder = new ContentBuilderImpl<{}>();
-  //   builder.table(t => t.row(r => r.cell(c => c.paragraph`B`)));
-  //   const section = builder.build({});
-  //   expect(section.contents[0].type).toBe('table');
-  //   if (section.contents[0].type === 'table') {
-  //     expect(section.contents[0].rows[0].cells[0].type).toBe('table-cell');
-  //     // TODO: add here check for the content of the cell
-  //   }
-  // });
+  it('should build a table', () => {
+    const builder = new ContentBuilderImpl<{}>();
+    builder.table(t => t.row(r => r.cell(c => c.paragraph`B`)));
+    const section = builder.build({});
+    expect(section.contents[0].type).toBe('table');
+    if (section.contents[0].type === 'table') {
+      expect(section.contents[0].rows[0].cells[0].type).toBe('table-cell');
+      expect(section.contents[0].rows[0].cells[0].contents[0].type).toBe('paragraph');
+      expect((section.contents[0].rows[0].cells[0].contents[0] as Paragraph).content).toBe('B');
+    }
+  });
 
   it('should chain multiple builders', () => {
     const builder = new ContentBuilderImpl<{ name: string }>();
