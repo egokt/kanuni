@@ -35,6 +35,10 @@ Kanuni.newQuery<{ title: string }>()
             )
           )
           .table(t => t
+            .columnHeaders((data) => [
+              `Column Header 1 with title: ${data.title}`,
+              `Column Header 2 with title: ${data.title}`,
+            ])
             .row(r => r
               .header`Row header with title: ${'title'}`
               .cell(c => c
@@ -45,10 +49,35 @@ Kanuni.newQuery<{ title: string }>()
               //@ts-expect-error
               .header`Row header with title: ${'title'}`
             )
+            // row header can come last
             .row(r => r
               .cell(c => c
                 .paragraph`Nested Cell 2 with title: ${'title'}`
               )
+              .header`Row header with title: ${'title'}`
+              //@ts-expect-error
+              .header`Row header with title: ${'title'}`
+            )
+            // row header can come first
+            .row(r => r
+              .header`Row header with title: ${'title'}`
+              .cell(c => c
+                .paragraph`Nested Cell 2 with title: ${'title'}`
+              )
+              //@ts-expect-error
+              .header`Row header with title: ${'title'}`
+            )
+            // row header can come in between cells
+            .row(r => r
+              .cell(c => c
+                .paragraph`Nested Cell 2 with title: ${'title'}`
+              )
+              .header`Row header with title: ${'title'}`
+              .cell(c => c
+                .paragraph`Nested Cell 2 with title: ${'title'}`
+              )
+              //@ts-expect-error
+              .header`Row header with title: ${'title'}`
             )
           )
         )

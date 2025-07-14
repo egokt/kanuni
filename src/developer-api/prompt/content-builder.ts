@@ -1,6 +1,5 @@
 import { ListBuilder, ListBuilderFunction } from './list-builder.js';
-import { SectionBuilder } from './section-builder.js';
-import { SectionContentBuilder } from './section-content-builder.js';
+import { SectionBuilder, SectionContentBuilder } from './section-builder.js';
 import { compile } from './string-template-helpers.js';
 import { TableBuilderFunction, TableBuilderImpl } from './table-builder.js';
 import { TableRowBuilder } from './table-row-builder.js';

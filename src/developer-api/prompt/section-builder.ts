@@ -1,10 +1,12 @@
-import { ContentBuilderImpl, ContentBuilderImplListDatum, ContentBuilderImplParagraphDatum, ContentBuilderImplTableDatum } from './content-builder.js';
-import { ListBuilderFunction } from './list-builder.js';
+import { Memory } from '../memory/index.js';
 import {
-  SectionContentBuilder,
-  SectionContentBuilderImpl,
-  SectionContentBuilderImplSectionDatum,
-} from './section-content-builder.js';
+  ContentBuilder,
+  ContentBuilderImpl,
+  ContentBuilderImplListDatum,
+  ContentBuilderImplParagraphDatum,
+  ContentBuilderImplTableDatum
+} from './content-builder.js';
+import { ListBuilderFunction } from './list-builder.js';
 import { compile } from './string-template-helpers.js';
 import { TableBuilderFunction } from './table-builder.js';
 import { Section } from './types.js';
@@ -41,6 +43,34 @@ export interface SectionBuilder<Params extends Record<string, any> = {}> extends
   ) => SectionBuilder<Params>;
 }
 
+export interface SectionContentBuilder<Params extends Record<string, any> = {}> extends ContentBuilder<Params> {
+  paragraph(
+    builderFunction: (data: Params) => string,
+  ): SectionContentBuilder<Params>;
+  paragraph(
+    strings: TemplateStringsArray,
+    ...keys: (keyof Params)[]
+  ): SectionContentBuilder<Params>;
+  list(
+    builderFunction: ListBuilderFunction<Params>,
+  ): SectionContentBuilder<Params>;
+  table(
+    builderFunction: TableBuilderFunction<Params>,
+  ): SectionContentBuilder<Params>;
+  section(
+    builderFunction: SectionBuilderFunction<Params>,
+  ): SectionContentBuilder<Params>;
+  memorySection: (
+    builderFunction: SectionBuilderFunction<Params>,
+  ) => SectionContentBuilder<Params>;
+}
+
+export type SectionBuilderImplSectionDatum<Params extends Record<string, any>> = {
+  type: 'section';
+  func: (data: Params) => Section;
+  isMemorySection?: boolean;
+};
+
 export type SectionBuilderImplHeadingDatum<Params extends Record<string, any>> = {
   type: 'heading';
   func: (data: Params) => string;
@@ -50,11 +80,11 @@ type SectionBuilderImplDatum<Params extends Record<string, any>> =
   | ContentBuilderImplParagraphDatum<Params>
   | ContentBuilderImplTableDatum<Params>
   | ContentBuilderImplListDatum<Params>
-  | SectionContentBuilderImplSectionDatum<Params>
-  | SectionBuilderImplHeadingDatum<Params>;
+  | SectionBuilderImplSectionDatum<Params>;
 
 export class SectionBuilderImpl<Params extends Record<string, any> = {}> implements SectionBuilder<Params> {
   private builderData: SectionBuilderImplDatum<Params>[];
+  private headingData?: SectionBuilderImplHeadingDatum<Params>;
 
   constructor() {
     this.builderData = [];
@@ -64,13 +94,13 @@ export class SectionBuilderImpl<Params extends Record<string, any> = {}> impleme
     strings: TemplateStringsArray,
     ...keys: (keyof Params)[]
   ): SectionContentBuilder<Params> {
-    this.builderData.push({
+    this.headingData = {
       type: 'heading',
       func: (data: Params) => {
         const headingStr = compile<Params>(strings, ...keys);
         return headingStr(data);
       },
-    });
+    };
     return this;
   }
 
@@ -115,29 +145,68 @@ export class SectionBuilderImpl<Params extends Record<string, any> = {}> impleme
     builderFunction: SectionBuilderFunction<Params>,
   ) => SectionBuilder<Params> =
     (builderFunction) =>
-      SectionContentBuilderImpl.defineSection<Params, SectionBuilder<Params>>(
+      SectionBuilderImpl.defineSection<Params, SectionBuilder<Params>>(
         this,
         this.builderData.push,
         builderFunction,
       );
 
+  // Note: this can definitely be improved: it should not allow nested memory sections,
+  // and we should also not allow multiple memory sections.
+  // For now, we'll handle it by testing for this in the build method.
   memorySection: (
     builderFunction: SectionBuilderFunction<Params>,
   ) => SectionBuilder<Params> =
     (builderFunction) =>
-      SectionContentBuilderImpl.defineSection<Params, SectionBuilder<Params>>(
+      SectionBuilderImpl.defineSection<Params, SectionBuilder<Params>>(
         this,
-        this.builderData.push,
+        builderData => this.builderData.push({
+          type: builderData.type,
+          func: builderData.func,
+          isMemorySection: true,
+        }),
         builderFunction,
         true,
       );
 
-  build(data: Params): Section {
-    // FIXME
-    data;
+  build(data: Params, memory?: Memory): Section {
+    const contents = this.builderData
+      .map(datum => {
+        if (datum.type === 'section' && datum.isMemorySection) {
+          const sectionData = datum.func(data);
+          return {
+            type: 'section',
+            contents: sectionData.contents,
+            heading: sectionData.heading,
+            memory,
+          } as Section;
+        } else {
+          return datum.func(data);
+        }
+      })
+      .filter(content => content !== undefined && content !== null);
     return {
       type: 'section',
-      contents: []
+      contents,
+      heading: this.headingData !== undefined ? this.headingData.func(data) : undefined,
     };
+  }
+
+  static defineSection<Params extends Record<string, any>, Builder extends (SectionBuilder<Params> | SectionContentBuilder<Params>)> (
+    builder: Builder,
+    pushToBuilderData: (builderData: SectionBuilderImplSectionDatum<Params>) => void,
+    builderFunction: SectionBuilderFunction<Params>,
+    isMemorySection?: boolean,
+  ): Builder {
+    const newBuilder = new SectionBuilderImpl<Params>();
+    const builderOrNull = builderFunction(newBuilder);
+    if (builderOrNull !== undefined && builderOrNull !== null) {
+      pushToBuilderData({
+        type: 'section',
+        func: (data: Params) => newBuilder.build(data),
+        isMemorySection,
+      });
+    }
+    return builder;
   }
 }
