@@ -1,26 +1,37 @@
-import { Memory } from "./types.js";
+import { Memory, MemoryItem } from "./types.js";
+
+type RoleDefault = 'user' | 'assistant';
 
 export type MemoryBuilderFunction<
   Params extends Record<string, any> = {},
-  Role extends string = 'user' | 'assistant',
+  Role extends string = RoleDefault,
 > = (
   builder: MemoryBuilder<Params, Role>,
 ) => MemoryBuilder<Params, Role> | undefined | null;
 
-export interface MemoryBuilder<Params extends Record<string, any> = {}, Role extends string = 'user' | 'assistant'> {
+export interface MemoryBuilder<
+  Params extends Record<string, any> = {},
+  Role extends string = RoleDefault
+> {
   message(
     role: Role,
     messageBuilderFunction: (data: Params) => string | undefined | null,
   ): MemoryBuilder<Params, Role>;
 }
 
-type MemoryBuilderImplMessageDatum<Params extends Record<string, any> = {}, Role extends string = 'user' | 'assistant'> = {
+type MemoryBuilderImplMessageDatum<
+  Params extends Record<string, any> = {},
+  Role extends string = RoleDefault
+> = {
   type: 'message';
   func: (data: Params) => string | undefined | null;
   role: Role;
 }
 
-export class MemoryBuilderImpl<Params extends Record<string, any> = {}, Role extends string = 'user' | 'assistant'> implements MemoryBuilder<Params, Role> {
+export class MemoryBuilderImpl<
+  Params extends Record<string, any> = {},
+  Role extends string = RoleDefault
+> implements MemoryBuilder<Params, Role> {
   private memoryData: (
     | MemoryBuilderImplMessageDatum<Params, Role>
   )[];
@@ -42,11 +53,19 @@ export class MemoryBuilderImpl<Params extends Record<string, any> = {}, Role ext
   }
 
   build(data: Params): Memory {
-    // FIXME
-    data;
+    const contents = this.memoryData.map(datum => {
+      const itemContents = datum.func(data);
+      return itemContents !== null && itemContents !== undefined
+        ? {
+          type: 'utterance',
+          role: datum.role,
+          contents: datum.func(data)
+        } as MemoryItem
+        : null;
+    }).filter(itemOrNull => itemOrNull !== null);
     return {
       type: 'memory',
-      contents: [],
-    }
+      contents,
+    };
   }
 }
