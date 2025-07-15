@@ -109,7 +109,9 @@ export class SectionBuilderImpl<Params extends Record<string, any> = {}> impleme
   ) => SectionBuilder<Params> =
     (builderFunction) =>
       ContentBuilderImpl.defineList<Params, SectionBuilder<Params>>(
-        this, this.builderData.push, builderFunction
+        this,
+        this.builderData.push.bind(this.builderData),
+        builderFunction
       );
 
   table: (
@@ -117,7 +119,9 @@ export class SectionBuilderImpl<Params extends Record<string, any> = {}> impleme
   ) => SectionBuilder<Params> =
     (builderFunction) =>
       ContentBuilderImpl.defineTable<Params, SectionBuilder<Params>>(
-        this, this.builderData.push, builderFunction
+        this,
+        this.builderData.push.bind(this.builderData),
+        builderFunction
       );
 
   paragraph(
@@ -132,10 +136,10 @@ export class SectionBuilderImpl<Params extends Record<string, any> = {}> impleme
       | TemplateStringsArray
       | ((data: Params) => string),
     ...keys: (keyof Params)[]
-  ): SectionContentBuilder<Params> {
-    return ContentBuilderImpl.defineParagraph<Params, SectionContentBuilder<Params>>(
+  ): SectionBuilder<Params> {
+    return ContentBuilderImpl.defineParagraph<Params, SectionBuilder<Params>>(
       this,
-      this.builderData.push,
+      this.builderData.push.bind(this.builderData),
       stringsOrBuilderFunction,
       ...keys
     );
@@ -147,13 +151,13 @@ export class SectionBuilderImpl<Params extends Record<string, any> = {}> impleme
     (builderFunction) =>
       SectionBuilderImpl.defineSection<Params, SectionBuilder<Params>>(
         this,
-        this.builderData.push,
+        this.builderData.push.bind(this.builderData),
         builderFunction,
       );
 
-  // Note: this can definitely be improved: it should not allow nested memory sections,
-  // and we should also not allow multiple memory sections.
-  // For now, we'll handle it by testing for this in the build method.
+  // Note: it will be checked at the query builder level that there is only
+  // one memory section in the query. So we allow multiple memory sections
+  // in this builder.
   memorySection: (
     builderFunction: SectionBuilderFunction<Params>,
   ) => SectionBuilder<Params> =
@@ -178,7 +182,10 @@ export class SectionBuilderImpl<Params extends Record<string, any> = {}> impleme
             type: 'section',
             contents: sectionData.contents,
             heading: sectionData.heading,
-            memory,
+            memory: memory ? memory : {
+              type: 'memory',
+              contents: [],
+            },
           } as Section;
         } else {
           return datum.func(data);
