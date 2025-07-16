@@ -1,1 +1,33 @@
-export { QueryBuilder, QueryBuilderImpl } from './query-builder.js';
+export type {
+  Memory,
+  MemoryBuilder,
+  MemoryBuilderFunction,
+  MemoryItem,
+  RoleDefault,
+} from './memory/index.js';
+export type {
+  ContentBuilder,
+  ItemsBuilderFunction,
+  List,
+  ListItem,
+  ListBuilder,
+  ListBuilderFunction,
+  Paragraph,
+  Section,
+  SectionBuilder,
+  SectionContentBuilder,
+  SectionBuilderFunction,
+  Table,
+  TableBuilder,
+  TableBuilderFunction,
+  TableBuilderWoColumnHeaders,
+  TableCell,
+  TableCellBuilder,
+  TableCellBuilderFunction,
+  TableHeaderCell,
+  TableRow,
+  TableRowBuilder,
+  TableRowBuilderWoHeader,
+  TableRowBuilderFunction,
+} from './prompt/index.js';
+export { QueryBuilder } from './query-builder.js';

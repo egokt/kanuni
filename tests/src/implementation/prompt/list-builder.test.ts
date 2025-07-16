@@ -1,9 +1,12 @@
-import { ListBuilder } from '../../../../src/developer-api/prompt/list-builder.js';
-import { List, Paragraph } from '../../../../src/developer-api/prompt/types.js';
+import {
+  List,
+  Paragraph,
+} from '../../../../src/developer-api/index.js';
+import { ListBuilderImpl } from '../../../../src/implementation/prompt/list-builder-impl.js';
 
 describe('ListBuilder', () => {
   it('builds a list with a single item', () => {
-    const builder = new ListBuilder<{ title: string }>();
+    const builder = new ListBuilderImpl<{ title: string }>();
     builder.item(data => `Item: ${data.title}`);
     const result = builder.build({ title: 'Example' });
     expect(result).toEqual({
@@ -21,7 +24,7 @@ describe('ListBuilder', () => {
 
   it('builds a list with multiple items in order', () => {
     const testStrings = ['foo', 'bar'];
-    const builder = new ListBuilder<{ a: string, b: string }>();
+    const builder = new ListBuilderImpl<{ a: string, b: string }>();
     builder.item(data => data.a).item(data => data.b);
     const result = builder.build({ a: testStrings[0], b: testStrings[1] });
     result.items.forEach((item, index) => {
@@ -33,7 +36,7 @@ describe('ListBuilder', () => {
   });
 
   it('builds a list with template string item', () => {
-    const builder = new ListBuilder<{ name: string }>();
+    const builder = new ListBuilderImpl<{ name: string }>();
     builder.item`Hello, ${'name'}`;
     const result = builder.build({ name: 'World' });
     if (result.items[0].content.type === 'paragraph') {
@@ -42,7 +45,7 @@ describe('ListBuilder', () => {
   });
 
   it('builds a nested list with .list()', () => {
-    const builder = new ListBuilder<{ outer: string, inner: string }>();
+    const builder = new ListBuilderImpl<{ outer: string, inner: string }>();
     builder.item(data => data.outer);
     builder.list(l => l.item(data => data.inner));
     const result = builder.build({ outer: 'A', inner: 'B' });
@@ -55,7 +58,7 @@ describe('ListBuilder', () => {
   });
 
   it('builds a deeply nested list', () => {
-    const builder = new ListBuilder<{ a: string, b: string, c: string }>();
+    const builder = new ListBuilderImpl<{ a: string, b: string, c: string }>();
     builder.list(l => l.list(l => l.item(d => d.c)));
     const result = builder.build({ a: 'x', b: 'y', c: 'z' });
     expect(result.items[0].content.type).toBe('list');
@@ -64,21 +67,21 @@ describe('ListBuilder', () => {
   });
 
   it('builds a list with .items() from an array', () => {
-    const builder = new ListBuilder<{ arr: string[] }>();
+    const builder = new ListBuilderImpl<{ arr: string[] }>();
     builder.items(['a', 'b', 'c'], (i, item: string) => i.item(_ => item));
     const result = builder.build({ arr: [] });
     expect(result.items.map((i: any) => i.content.content)).toEqual(['a', 'b', 'c']);
   });
 
   it('builds a list with .items() from an empty array', () => {
-    const builder = new ListBuilder<{}>();
+    const builder = new ListBuilderImpl<{}>();
     builder.items([], (i, item) => i.item(_ => String(item)));
     const result = builder.build({});
     expect(result.items).toEqual([]);
   });
 
   it('builds a list with mixed .item(), .list(), and .items()', () => {
-    const builder = new ListBuilder<{ arr: string[] }>();
+    const builder = new ListBuilderImpl<{ arr: string[] }>();
     builder.item((_data: any) => 'first');
     builder.list(l => l.item(_ => 'sub'));
     builder.items(['x', 'y'], (i, item) => i.item(_ => item));
@@ -91,7 +94,7 @@ describe('ListBuilder', () => {
   });
 
   it('omits null or undefined items', () => {
-    const builder = new ListBuilder<{}>();
+    const builder = new ListBuilderImpl<{}>();
     builder.list(() => null);
     builder.items([1], () => null);
     builder.item(() => 'ok');
@@ -101,7 +104,7 @@ describe('ListBuilder', () => {
   });
 
   it('flattens the final items array', () => {
-    const builder = new ListBuilder<{}>();
+    const builder = new ListBuilderImpl<{}>();
     builder.items([1, 2], (i, n: number) => i.item(_ => String(n)));
     const result = builder.build({});
     expect(Array.isArray(result.items)).toBe(true);
@@ -111,7 +114,7 @@ describe('ListBuilder', () => {
   });
 
   it('passes data through all builder functions', () => {
-    const builder = new ListBuilder<{ foo: string }>();
+    const builder = new ListBuilderImpl<{ foo: string }>();
     builder.item(data => data.foo);
     builder.list(l => l.item(data => data.foo + '!'));
     const result = builder.build({ foo: 'bar' });

@@ -1,4 +1,4 @@
-import { TableRowBuilderImpl } from "../../../../src/developer-api/prompt/table-row-builder.js";
+import { TableRowBuilderImpl } from "../../../../src/implementation/prompt/table-row-builder-impl.js";
 
 describe('TableRowBuilderImpl build method', () => {
   const data = { title: 'Test Title', value: 42 };

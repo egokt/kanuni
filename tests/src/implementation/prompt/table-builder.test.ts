@@ -1,5 +1,5 @@
-import { TableBuilderImpl } from '../../../../src/developer-api/prompt/table-builder.js';
 import { Paragraph, Table } from '../../../../src/developer-api/prompt/types.js';
+import { TableBuilderImpl } from '../../../../src/implementation/prompt/table-builder-impl.js';
 
 describe('TableBuilderImpl', () => {
   it('builds a basic table with rows and cells', () => {

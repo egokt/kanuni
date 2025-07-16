@@ -1,4 +1,4 @@
-import { MemoryBuilderImpl } from "../../../../src/developer-api/memory/memory-builder.js";
+import { MemoryBuilderImpl } from "../../../../src/implementation/memory/index.js";
 
 describe("MemoryBuilder implementation", () => {
   it("returns a memory object with correct type and contents for multiple messages", () => {

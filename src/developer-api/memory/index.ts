@@ -1,2 +1,9 @@
-export { MemoryBuilder, MemoryBuilderImpl, MemoryBuilderFunction } from './memory-builder.js';
-export type { Memory } from './types.js';
+export type {
+  MemoryBuilder,
+  MemoryBuilderFunction,
+  RoleDefault,
+} from './memory-builder.js';
+export type {
+  Memory,
+  MemoryItem,
+} from './types.js';

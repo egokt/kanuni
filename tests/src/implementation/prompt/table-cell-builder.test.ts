@@ -1,5 +1,5 @@
-import { TableCellBuilderImpl } from '../../../../src/developer-api/prompt/table-cell-builder.js';
 import { expect, describe, it } from '@jest/globals';
+import { TableCellBuilderImpl } from '../../../../src/implementation/prompt/table-cell-builder-impl.js';
 
 describe('TableCellBuilderImpl', () => {
   it('builds a cell with a single paragraph', () => {

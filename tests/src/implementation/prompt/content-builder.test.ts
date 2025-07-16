@@ -1,5 +1,5 @@
-import { ContentBuilderImpl } from '../../../../src/developer-api/prompt/content-builder.js';
 import { Paragraph } from '../../../../src/developer-api/prompt/types.js';
+import { ContentBuilderImpl } from '../../../../src/implementation/prompt/context-builder-impl.js';
 
 describe('content-builder', () => {
   it('should build a paragraph using a function', () => {

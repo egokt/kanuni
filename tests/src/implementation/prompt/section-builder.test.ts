@@ -1,5 +1,5 @@
-import { SectionBuilderImpl } from '../../../../src/developer-api/prompt/section-builder.js';
 import { Section } from '../../../../src/developer-api/prompt/types.js';
+import { SectionBuilderImpl } from '../../../../src/implementation/prompt/section-builder-impl.js';
 
 describe('SectionBuilderImpl.build', () => {
   it('builds a section with heading and paragraph', () => {
