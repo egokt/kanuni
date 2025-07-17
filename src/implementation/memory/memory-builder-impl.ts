@@ -45,7 +45,7 @@ export class MemoryBuilderImpl<
         ? {
           type: 'utterance',
           role: datum.role,
-          contents: datum.func(data)
+          contents: itemContents,
         } as MemoryItem
         : null;
     }).filter(itemOrNull => itemOrNull !== null);
