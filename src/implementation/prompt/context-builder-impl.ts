@@ -123,15 +123,6 @@ export class ContentBuilderImpl<Params extends Record<string, any> = {}> impleme
       },
     })
     return builder;
-    // const newBuilder = new ListBuilder<Params>();
-    // const builderOrNull = listBuilderFunction(newBuilder, data);
-    // if (builderOrNull !== undefined && builderOrNull !== null) {
-    //   pushToBuilderData({
-    //     type: 'list',
-    //     func: (data: Params) => builderOrNull.build(data),
-    //   });
-    // }
-    // return builder;
   }
 
   static defineTable<Params extends Record<string, any>, Builder extends (SectionBuilder<Params> | SectionContentBuilder<Params> | ContentBuilder<Params>)>(
