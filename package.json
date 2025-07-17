@@ -16,10 +16,7 @@
     "compile-type-tests": "tsc --project tsconfig.compile-tests.json",
     "prod-build": "tsc --sourceMap false --declarationMap false --declaration false",
     "publish-npm": "npm run build-npm && cd build && npm publish && cd -",
-    "clean": "rm -rf build",
-    "prepare": "husky",
-    "lint": "npx prettier . --check",
-    "lint-fix": "npx prettier . --write"
+    "clean": "rm -rf build"
   },
   "devDependencies": {
     "@jest/globals": "^29.7.0",
@@ -30,11 +27,5 @@
     "prettier": "^3.6.2",
     "ts-jest": "^29.2.5",
     "typescript": "^5.6.3"
-  },
-  "prettier": {
-    "singleQuote": true
-  },
-  "lint-staged": {
-    "**/*": "prettier --write --ignore-unknown"
   }
 }
