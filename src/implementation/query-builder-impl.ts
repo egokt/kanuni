@@ -1,9 +1,10 @@
 import {
   Memory,
   MemoryBuilderFunction,
+  Query,
   QueryBuilder,
   Section,
-  SectionBuilderFunction,
+  SectionBuilderWoMemoryFunction,
 } from "../developer-api/index.js";
 import {
   MemoryBuilderImpl,
@@ -13,7 +14,7 @@ import {
 } from "./prompt/index.js";
 
 export class QueryBuilderImpl<Params extends Record<string, any> = {}> implements QueryBuilder<Params> {
-  private promptData: ((data: Params) => Section) | null;
+  private promptData: ((data: Params, memory?: Memory) => Section) | null;
   private memoryData: ((data: Params) => Memory) | null;
 
   constructor() {
@@ -22,12 +23,12 @@ export class QueryBuilderImpl<Params extends Record<string, any> = {}> implement
   }
 
   prompt(
-    promptBuilderFunction: SectionBuilderFunction<Params>,
+    promptBuilderFunction: SectionBuilderWoMemoryFunction<Params>,
   ): QueryBuilder<Params> {
     const newBuilder = new SectionBuilderImpl<Params>();
     const sectionBuilderOrNull = promptBuilderFunction(newBuilder);
     if (sectionBuilderOrNull !== undefined && sectionBuilderOrNull !== null) {
-      this.promptData = (data) => newBuilder.build(data);
+      this.promptData = (data, memory) => newBuilder.build(data, memory);
     }
     return this;
   }
@@ -43,11 +44,13 @@ export class QueryBuilderImpl<Params extends Record<string, any> = {}> implement
     return this;
   }
 
-  build(data: Params) {
-    // FIXME
-    this.promptData;
-    this.memoryData;
-    data;
-    return '';
+  build(data: Params): Query {
+    const memory = this.memoryData === null ? undefined : this.memoryData(data);
+    return {
+      prompt: {
+        type: 'prompt',
+        contents: this.promptData === null ? [] : this.promptData(data, memory).contents,
+      }
+    };
   }
 }

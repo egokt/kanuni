@@ -1,8 +1,7 @@
-import { Kanuni } from "../../../src/index.js";
+import { Kanuni, TextualMarkdownFormatter } from "../../../src/index.js";
 
-Kanuni.newQuery<{ title: string }>()
+const query = Kanuni.newQuery<{ title: string }>()
   .prompt(p => p
-    .heading`Section ${'title'}`
     .paragraph`This is a simple paragraph with title: ${'title'}`
     // this is a placeholder for the section that will include the chat history
     // it is optional, mainly to be used for customizing the heading when
@@ -11,6 +10,9 @@ Kanuni.newQuery<{ title: string }>()
       .heading`Chat history Section`
       .paragraph`Here are the things you can find in the chat history...`
     )
+    // prompt is like a section, but it does not support a heading
+    //@ts-expect-error
+    .heading`Section ${'title'}`
   )
   .memory<'user' | 'assistant'>(m => m
     .message('user', () => 'This is a user message')
@@ -23,3 +25,6 @@ Kanuni.newQuery<{ title: string }>()
     //   'success', // TODO: result status, e.g. 'success' or 'error', - add error message if status is 'error' (optional?)
     // )
   )
+  .build({ title: 'My Title' })
+
+new TextualMarkdownFormatter().format(query);

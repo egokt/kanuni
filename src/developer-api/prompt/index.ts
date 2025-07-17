@@ -10,6 +10,8 @@ export {
   SectionBuilder,
   SectionContentBuilder,
   SectionBuilderFunction,
+  SectionContentWoMemoryBuilder,
+  SectionBuilderWoMemoryFunction,
 } from './section-builder.js';
 export type {
   TableBuilder,

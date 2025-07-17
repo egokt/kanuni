@@ -8,6 +8,13 @@ export type SectionBuilderFunction<
   sectionBuilder: SectionBuilder<Params>,
 ) => SectionBuilder<Params> | SectionContentBuilder<Params> | undefined | null;
 
+export type SectionBuilderWoMemoryFunction<
+  Params extends Record<string, any> = {},
+> = (
+  sectionBuilder: SectionContentWoMemoryBuilder<Params>,
+) => SectionContentWoMemoryBuilder<Params> | undefined | null;
+
+
 export interface SectionBuilder<Params extends Record<string, any> = {}> extends SectionContentBuilder<Params> {
   paragraph(
     builderFunction: (data: Params) => string,
@@ -34,7 +41,13 @@ export interface SectionBuilder<Params extends Record<string, any> = {}> extends
   ) => SectionBuilder<Params>;
 }
 
-export interface SectionContentBuilder<Params extends Record<string, any> = {}> extends ContentBuilder<Params> {
+export interface SectionContentBuilder<Params extends Record<string, any> = {}> extends SectionContentWoMemoryBuilder<Params> {
+  memorySection: (
+    builderFunction: SectionBuilderFunction<Params>,
+  ) => SectionContentBuilder<Params>;
+}
+
+export interface SectionContentWoMemoryBuilder<Params extends Record<string, any> = {}> extends ContentBuilder<Params> {
   paragraph(
     builderFunction: (data: Params) => string,
   ): SectionContentBuilder<Params>;
@@ -51,7 +64,4 @@ export interface SectionContentBuilder<Params extends Record<string, any> = {}> 
   section(
     builderFunction: SectionBuilderFunction<Params>,
   ): SectionContentBuilder<Params>;
-  memorySection: (
-    builderFunction: SectionBuilderFunction<Params>,
-  ) => SectionContentBuilder<Params>;
 }

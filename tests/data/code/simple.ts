@@ -2,7 +2,6 @@ import { Kanuni } from '../../../src/index.js';
 
 Kanuni.newQuery<{ title: string }>()
   .prompt(p => p
-    .heading`Section ${'title'}`
     .section((s) => s
       .heading`Subsection 1.1`
       .section((s) => s
