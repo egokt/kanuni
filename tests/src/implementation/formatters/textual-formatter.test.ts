@@ -18,9 +18,7 @@ describe("TextualFormatter.format", () => {
     const query: Query = {
       prompt: {
         type: "prompt",
-        contents: [
-          { type: "paragraph", content: "Hello world" } as Paragraph,
-        ],
+        contents: [{ type: "paragraph", content: "Hello world" } as Paragraph],
       } as Prompt,
     } as Query;
     expect(formatter.format(query)).toBe("Hello world");
@@ -50,9 +48,14 @@ describe("TextualFormatter.format", () => {
             type: "list",
             items: [
               { content: { type: "paragraph", content: "Item 1" } },
-              { content: { type: "list", items: [
-                { content: { type: "paragraph", content: "Subitem 1" } },
-              ] } },
+              {
+                content: {
+                  type: "list",
+                  items: [
+                    { content: { type: "paragraph", content: "Subitem 1" } },
+                  ],
+                },
+              },
             ],
           } as List,
         ],
@@ -71,9 +74,7 @@ describe("TextualFormatter.format", () => {
           {
             type: "section",
             heading: "Section Heading",
-            contents: [
-              { type: "paragraph", content: "Section content" },
-            ],
+            contents: [{ type: "paragraph", content: "Section content" }],
           } as Section,
         ],
       },
@@ -91,14 +92,24 @@ describe("TextualFormatter.format", () => {
           {
             type: "table",
             columnHeaders: [
-              { contents: { type: "paragraph", content: "Header 1" }, type: "table-header-cell" } as TableHeaderCell,
-              { contents: { type: "paragraph", content: "Header 2" }, type: "table-header-cell" } as TableHeaderCell,
+              {
+                contents: { type: "paragraph", content: "Header 1" },
+                type: "table-header-cell",
+              } as TableHeaderCell,
+              {
+                contents: { type: "paragraph", content: "Header 2" },
+                type: "table-header-cell",
+              } as TableHeaderCell,
             ],
             rows: [
               {
                 cells: [
-                  { contents: [{ type: "paragraph", content: "Cell 1" }] } as TableCell,
-                  { contents: [{ type: "paragraph", content: "Cell 2" }] } as TableCell,
+                  {
+                    contents: [{ type: "paragraph", content: "Cell 1" }],
+                  } as TableCell,
+                  {
+                    contents: [{ type: "paragraph", content: "Cell 2" }],
+                  } as TableCell,
                 ],
                 type: "table-row",
               } as TableRow,
@@ -149,9 +160,7 @@ describe("TextualFormatter.format", () => {
     });
     const memory: Memory = {
       type: "memory",
-      contents: [
-        { type: "utterance", role: "user", contents: "Msg" },
-      ],
+      contents: [{ type: "utterance", role: "user", contents: "Msg" }],
     };
     const query: Query = {
       prompt: {
@@ -159,9 +168,7 @@ describe("TextualFormatter.format", () => {
         contents: [
           {
             type: "list",
-            items: [
-              { content: { type: "paragraph", content: "Item" } },
-            ],
+            items: [{ content: { type: "paragraph", content: "Item" } }],
           },
           {
             type: "section",
@@ -182,12 +189,12 @@ describe("TextualFormatter.format", () => {
     const query: Query = {
       prompt: {
         type: "prompt",
-        contents: [
-          { type: "unknownType" } as any,
-        ],
+        contents: [{ type: "unknownType" } as any],
       },
     } as Query;
-    expect(() => formatter.format(query)).toThrow("Unknown content type: unknownType");
+    expect(() => formatter.format(query)).toThrow(
+      "Unknown content type: unknownType",
+    );
   });
 
   it("handles empty prompt contents", () => {

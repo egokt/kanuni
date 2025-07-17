@@ -8,7 +8,8 @@ export type TableCellBuilderFunction<
   builder: TableCellBuilder<BuilderData>,
 ) => TableCellBuilder<BuilderData> | undefined | null;
 
-export interface TableCellBuilder<Params extends Record<string, any> = {}> extends ContentBuilder<Params> {
+export interface TableCellBuilder<Params extends Record<string, any> = {}>
+  extends ContentBuilder<Params> {
   paragraph(
     builderFunction: (data: Params) => string,
   ): TableCellBuilder<Params>;
@@ -16,9 +17,7 @@ export interface TableCellBuilder<Params extends Record<string, any> = {}> exten
     strings: TemplateStringsArray,
     ...keys: (keyof Params)[]
   ): TableCellBuilder<Params>;
-  list(
-    builderFunction: ListBuilderFunction<Params>,
-  ): TableCellBuilder<Params>;
+  list(builderFunction: ListBuilderFunction<Params>): TableCellBuilder<Params>;
   table(
     builderFunction: TableBuilderFunction<Params>,
   ): TableCellBuilder<Params>;

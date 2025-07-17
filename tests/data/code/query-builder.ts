@@ -1,5 +1,6 @@
 import { Kanuni, TextualMarkdownFormatter } from "../../../src/index.js";
 
+// prettier-ignore
 const query = Kanuni.newQuery<{ title: string }>()
   .prompt(p => p
     .paragraph`This is a simple paragraph with title: ${'title'}`

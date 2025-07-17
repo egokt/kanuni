@@ -4,8 +4,8 @@ describe("MemoryBuilder implementation", () => {
   it("returns a memory object with correct type and contents for multiple messages", () => {
     const builder = new MemoryBuilderImpl<{ foo: string }>();
     builder
-      .message("user", d => `User: ${d.foo}`)
-      .message("assistant", d => `Assistant: ${d.foo}`);
+      .message("user", (d) => `User: ${d.foo}`)
+      .message("assistant", (d) => `Assistant: ${d.foo}`);
     const result = builder.build({ foo: "bar" });
     expect(result).toEqual({
       type: "memory",
@@ -19,7 +19,7 @@ describe("MemoryBuilder implementation", () => {
   it("skips messages whose builder function returns undefined or null", () => {
     const builder = new MemoryBuilderImpl<{ show: boolean }>();
     builder
-      .message("user", d => (d.show ? "Visible" : undefined))
+      .message("user", (d) => (d.show ? "Visible" : undefined))
       .message("assistant", () => null);
     const result = builder.build({ show: false });
     expect(result.contents.length).toBe(0);
@@ -38,7 +38,11 @@ describe("MemoryBuilder implementation", () => {
       .message("assistant", () => "second")
       .message("user", () => "third");
     const result = builder.build({});
-    expect(result.contents.map(c => c.contents)).toEqual(["first", "second", "third"]);
+    expect(result.contents.map((c) => c.contents)).toEqual([
+      "first",
+      "second",
+      "third",
+    ]);
   });
 
   it("supports custom roles", () => {
@@ -54,7 +58,7 @@ describe("MemoryBuilder implementation", () => {
 
   it("passes the correct data to message builder functions", () => {
     const builder = new MemoryBuilderImpl<{ value: number }>();
-    builder.message("user", d => `Value is ${d.value}`);
+    builder.message("user", (d) => `Value is ${d.value}`);
     const result = builder.build({ value: 42 });
     expect(result.contents[0].contents).toBe("Value is 42");
   });
@@ -65,7 +69,11 @@ describe("MemoryBuilder implementation", () => {
     const result = builder.build({});
     // Should include empty string
     expect(result.contents.length).toBe(1);
-    expect(result.contents[0]).toEqual({ type: "utterance", role: "user", contents: "" });
+    expect(result.contents[0]).toEqual({
+      type: "utterance",
+      role: "user",
+      contents: "",
+    });
   });
 
   it("handles mixed valid and skip (undefined/null) message outputs", () => {

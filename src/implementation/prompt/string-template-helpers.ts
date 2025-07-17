@@ -5,8 +5,8 @@ export function compile<T extends Record<string, any>>(
   return (data: T): string => {
     return strings.reduce((result, str, i) => {
       const key = keys[i];
-      const value = key ? data[key] : '';
+      const value = key ? data[key] : "";
       return `${result}${str}${value}`;
-    }, '');
+    }, "");
   };
 }

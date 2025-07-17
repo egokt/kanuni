@@ -1,4 +1,4 @@
-export type RoleDefault = 'user' | 'assistant';
+export type RoleDefault = "user" | "assistant";
 
 export type MemoryBuilderFunction<
   Params extends Record<string, any> = {},
@@ -9,7 +9,7 @@ export type MemoryBuilderFunction<
 
 export interface MemoryBuilder<
   Params extends Record<string, any> = {},
-  Role extends string = RoleDefault
+  Role extends string = RoleDefault,
 > {
   message(
     role: Role,

@@ -1,5 +1,6 @@
-import { Kanuni } from '../../../src/index.js';
+import { Kanuni } from "../../../src/index.js";
 
+// prettier-ignore
 Kanuni.newQuery<{ title: string, exampleItems: [string, string[]][] }>()
   .prompt(p => p
     .list((l, data) => l

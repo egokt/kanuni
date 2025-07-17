@@ -1,1 +1,1 @@
-export { TextualMarkdownFormatter } from './textual-markdown-formatter.js';
+export { TextualMarkdownFormatter } from "./textual-markdown-formatter.js";

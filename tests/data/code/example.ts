@@ -1,5 +1,6 @@
 import { Kanuni } from "../../../src/index.js";
 
+// prettier-ignore
 Kanuni.newQuery<{
   aiSuggestedContext: string,
   aiSuggestedSubcontext: string,

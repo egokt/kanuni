@@ -1,15 +1,16 @@
-export type ListBuilderFunction<Params extends Record<string, any> = {}> =
-  (
-    listBuilder: ListBuilder<Params>,
-    data: Params,
-  ) => ListBuilder<Params> | undefined | null;
+export type ListBuilderFunction<Params extends Record<string, any> = {}> = (
+  listBuilder: ListBuilder<Params>,
+  data: Params,
+) => ListBuilder<Params> | undefined | null;
 
-export type ItemsBuilderFunction<Params extends Record<string, any> = {}, T = any> =
-  (
-    listItemsBuilder: ListBuilder<Params>,
-    item: T,
-    index: number,
-  ) => ListBuilder<Params> | ListBuilder<Params>[] | undefined | null;
+export type ItemsBuilderFunction<
+  Params extends Record<string, any> = {},
+  T = any,
+> = (
+  listItemsBuilder: ListBuilder<Params>,
+  item: T,
+  index: number,
+) => ListBuilder<Params> | ListBuilder<Params>[] | undefined | null;
 
 /**
  * A builder for creating lists of items or sublists.
@@ -17,7 +18,7 @@ export type ItemsBuilderFunction<Params extends Record<string, any> = {}, T = an
  * A list can contain items, which are paragraphs, or sublists.
  *
  * See tests/data/code/list-builder.ts as an example of how to use this builder.
- * 
+ *
  * # Iterating to build lists
  *
  * Following examples uses a contextAndSubcontexts array with type
@@ -99,9 +100,7 @@ export interface ListBuilder<Params extends Record<string, any> = {}> {
    * @param builderFunction A function that takes the user supplied data
    * and returns a string that will be used as the content of the list item.
    */
-  item(
-    builderFunction: (data: Params) => string,
-  ): ListBuilder<Params>;
+  item(builderFunction: (data: Params) => string): ListBuilder<Params>;
   /**
    * Adds a list item to the list.
    *
@@ -130,13 +129,10 @@ export interface ListBuilder<Params extends Record<string, any> = {}> {
     ...keys: (keyof Params)[]
   ): ListBuilder<Params>;
 
-  list(
-    listBuilderFunction: ListBuilderFunction<Params>,
-  ): ListBuilder<Params>;
+  list(listBuilderFunction: ListBuilderFunction<Params>): ListBuilder<Params>;
 
   items<T>(
     itemsIterable: Iterable<T>,
     itemsBuilderFunction: ItemsBuilderFunction<Params, T>,
   ): ListBuilder<Params>;
-
 }

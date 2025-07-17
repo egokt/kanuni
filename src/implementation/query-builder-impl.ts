@@ -6,14 +6,12 @@ import {
   Section,
   SectionBuilderWoMemoryFunction,
 } from "../developer-api/index.js";
-import {
-  MemoryBuilderImpl,
-} from "./memory/index.js";
-import {
-  SectionBuilderImpl,
-} from "./prompt/index.js";
+import { MemoryBuilderImpl } from "./memory/index.js";
+import { SectionBuilderImpl } from "./prompt/index.js";
 
-export class QueryBuilderImpl<Params extends Record<string, any> = {}> implements QueryBuilder<Params> {
+export class QueryBuilderImpl<Params extends Record<string, any> = {}>
+  implements QueryBuilder<Params>
+{
   private promptData: ((data: Params, memory?: Memory) => Section) | null;
   private memoryData: ((data: Params) => Memory) | null;
 
@@ -48,9 +46,12 @@ export class QueryBuilderImpl<Params extends Record<string, any> = {}> implement
     const memory = this.memoryData === null ? undefined : this.memoryData(data);
     return {
       prompt: {
-        type: 'prompt',
-        contents: this.promptData === null ? [] : this.promptData(data, memory).contents,
-      }
+        type: "prompt",
+        contents:
+          this.promptData === null
+            ? []
+            : this.promptData(data, memory).contents,
+      },
     };
   }
 }

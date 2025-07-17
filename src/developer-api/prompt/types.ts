@@ -2,7 +2,7 @@ import { Memory } from "../memory/types.js";
 
 // This is one part in the prompt
 export type Section = {
-  type: 'section';
+  type: "section";
   heading?: string;
   contents: (ContentPart | Section)[];
   memory?: Memory;
@@ -19,34 +19,34 @@ export type ContentPart = Paragraph | Table | List;
 // export type SegmentPart = Paragraph | Table | List;
 
 export type Paragraph = {
-  type: 'paragraph'; // this is needed for use in discriminated unions
+  type: "paragraph"; // this is needed for use in discriminated unions
   content: string; // TODO: how about emphasis, tags, etc in the text?
 };
 
 export type Table = {
-  type: 'table'; // this is needed for use in discriminated unions
+  type: "table"; // this is needed for use in discriminated unions
   columnHeaders?: TableHeaderCell[];
   rows: TableRow[];
 };
 
 export type TableHeaderCell = {
-  type: 'table-header-cell';
+  type: "table-header-cell";
   contents: Paragraph;
 };
 
 export type TableRow = {
-  type: 'table-row';
+  type: "table-row";
   rowHeader?: TableHeaderCell;
   cells: TableCell[];
 };
 
 export type TableCell = {
-  type: 'table-cell';
+  type: "table-cell";
   contents: ContentPart[];
 };
 
 export type List = {
-  type: 'list'; // this is needed for use in discriminated unions
+  type: "list"; // this is needed for use in discriminated unions
   items: ListItem[];
 };
 
@@ -55,6 +55,6 @@ export type ListItem = {
 };
 
 export type Prompt = {
-  type: 'prompt';
+  type: "prompt";
   contents: (ContentPart | Section)[];
-}
+};
