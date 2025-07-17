@@ -29,6 +29,7 @@ export type {
   List,
   ListItem,
   Paragraph,
+  Prompt,
   Section,
   Table,
   TableCell,

@@ -13,6 +13,7 @@ export type {
   ListBuilder,
   ListBuilderFunction,
   Paragraph,
+  Prompt,
   Section,
   SectionBuilder,
   SectionContentBuilder,
@@ -31,3 +32,5 @@ export type {
   TableRowBuilderFunction,
 } from './prompt/index.js';
 export { QueryBuilder } from './query-builder.js';
+export type { Query } from './types.js';
+export type { Formatter } from './formatter.js';
