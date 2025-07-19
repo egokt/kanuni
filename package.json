@@ -1,12 +1,12 @@
 {
-  "name": "@arcline/kanuni",
+  "name": "kanuni",
   "version": "0.0.1",
   "description": "Kanuni - The Prompt-Builder Library",
   "main": "./index.js",
   "types": "./index.d.ts",
   "type": "module",
-  "author": "Arcline-AI Team",
-  "license": "ISC",
+  "author": "Erek Gokturk",
+  "license": "MIT",
   "scripts": {
     "build": "tsc",
     "build-watch": "tsc -w",
