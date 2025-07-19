@@ -1,5 +1,4 @@
 import { QueryBuilderImpl } from "../../../src/implementation/query-builder-impl.js";
-import { describe, it, expect } from "@jest/globals";
 
 describe("QueryBuilderImpl", () => {
   it("returns correct prompt contents when only prompt is set", () => {
@@ -22,7 +21,7 @@ describe("QueryBuilderImpl", () => {
   it("returns correct prompt and memory when both prompt and memory are set", () => {
     const builder = new QueryBuilderImpl<{ foo: string }>();
     builder.prompt((p) => p.paragraph`Prompt: ${"foo"}`);
-    builder.memory((m) => m.message("user", (d) => `User: ${d.foo}`));
+    builder.memory((m) => m.message("user", (d) => `${d.foo}`));
     const result = builder.build({ foo: "bar" });
     expect(result).toEqual({
       prompt: {
@@ -32,6 +31,16 @@ describe("QueryBuilderImpl", () => {
             type: "paragraph",
             content: "Prompt: bar",
           }),
+        ],
+      },
+      memory: {
+        type: 'memory',
+        contents: [
+          {
+            type: 'utterance',
+            role: 'user',
+            contents: 'bar',
+          },
         ],
       },
     });
