@@ -1,5 +1,13 @@
+import z from "zod";
 import { Kanuni, TextualMarkdownFormatter } from "../../../src/index.js";
 
+
+// Should be ok without memory and output
+Kanuni.newQuery<{ title: string }>()
+  .prompt(p => p.paragraph`This is a simple paragraph with title: ${'title'}`)
+  .build({ title: 'My Title' });
+
+// Larger example with memory and output
 // prettier-ignore
 const query = Kanuni.newQuery<{ title: string }>()
   .prompt(p => p
@@ -26,6 +34,10 @@ const query = Kanuni.newQuery<{ title: string }>()
     //   'success', // TODO: result status, e.g. 'success' or 'error', - add error message if status is 'error' (optional?)
     // )
   )
+  .output(o => o.json({
+    reasoning: z.string(),
+    result: z.string(),
+  }))
   .build({ title: 'My Title' })
 
 new TextualMarkdownFormatter().format(query);
