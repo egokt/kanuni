@@ -18,6 +18,6 @@ export type TextOutput = {
 
 export type JsonOutput<T extends Record<string, any> = Record<string, any>> = {
   type: "output-json";
-  schemaName?: string;
+  schemaName: string;
   schema: ZodObject<T>;
 };
