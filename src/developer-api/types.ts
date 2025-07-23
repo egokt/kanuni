@@ -1,16 +1,19 @@
 import { ZodObject } from "zod";
 import { Prompt } from "./prompt/index.js";
-import { Memory } from "./memory/index.js";
+import { Memory, RoleDefault } from "./memory/index.js";
 
-export type Query<T extends Record<string, any> = Record<string, any>> = {
+export type Query<
+  OutputSchema extends Record<string, any> = Record<string, any>,
+  Role extends string = RoleDefault
+> = {
   prompt: Prompt;
-  output?: Output<T> | null;
-  memory?: Memory;
+  output?: Output<OutputSchema>;
+  memory?: Memory<Role>;
 };
 
-type Output<T extends Record<string, any> = Record<string, any>> =
+type Output<OutputSchema extends Record<string, any> = Record<string, any>> =
   | TextOutput
-  | JsonOutput<T>;
+  | JsonOutput<OutputSchema>;
 
 export type TextOutput = {
   type: "output-text";

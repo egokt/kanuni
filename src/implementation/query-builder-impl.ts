@@ -4,6 +4,7 @@ import {
   OutputBuilderFunction,
   Query,
   QueryBuilder,
+  RoleDefault,
   Section,
   SectionBuilderWoMemoryFunction,
 } from "../developer-api/index.js";
@@ -11,8 +12,8 @@ import { MemoryBuilderImpl } from "./memory/index.js";
 import { OutputBuilderImpl } from "./output-builder-impl.js";
 import { SectionBuilderImpl } from "./prompt/index.js";
 
-export class QueryBuilderImpl<Params extends Record<string, any> = {}>
-  implements QueryBuilder<Params>
+export class QueryBuilderImpl<Params extends Record<string, any> = {}, Role extends string = RoleDefault>
+  implements QueryBuilder<Params, Role>
 {
   private promptData: ((data: Params, memory?: Memory) => Section) | null;
   private memoryData: ((data: Params) => Memory) | null;
@@ -26,7 +27,7 @@ export class QueryBuilderImpl<Params extends Record<string, any> = {}>
 
   prompt(
     promptBuilderFunction: SectionBuilderWoMemoryFunction<Params>,
-  ): QueryBuilder<Params> {
+  ): QueryBuilder<Params, Role> {
     const newBuilder = new SectionBuilderImpl<Params>();
     const sectionBuilderOrNull = promptBuilderFunction(newBuilder);
     if (sectionBuilderOrNull !== undefined && sectionBuilderOrNull !== null) {
@@ -35,9 +36,9 @@ export class QueryBuilderImpl<Params extends Record<string, any> = {}>
     return this;
   }
 
-  memory<Role extends string>(
+  memory(
     memoryBuilderFunction: MemoryBuilderFunction<Params, Role>,
-  ): QueryBuilder<Params> {
+  ): QueryBuilder<Params, Role> {
     const newBuilder = new MemoryBuilderImpl<Params, Role>();
     const memoryBuilderOrNull = memoryBuilderFunction(newBuilder);
     if (memoryBuilderOrNull !== undefined && memoryBuilderOrNull !== null) {
@@ -48,7 +49,7 @@ export class QueryBuilderImpl<Params extends Record<string, any> = {}>
 
   output<Schema extends Record<string, any> = Record<string, any>>(
     outputBuilderFunction: OutputBuilderFunction<Schema>,
-  ): QueryBuilder<Params> {
+  ): QueryBuilder<Params, Role> {
     const newBuilder = new OutputBuilderImpl<Schema>();
     const outputBuilderOrNull = outputBuilderFunction(newBuilder);
     if (outputBuilderOrNull !== undefined && outputBuilderOrNull !== null) {

@@ -23,9 +23,9 @@ const query = Kanuni.newQuery<{ title: string }>()
     //@ts-expect-error
     .heading`Section ${'title'}`
   )
-  .memory<'user' | 'assistant'>(m => m
-    .message('user', () => 'This is a user message')
-    .message('assistant', () => 'This is an assistant message')
+  .memory(m => m
+    .utterance('user', () => 'This is a user message')
+    .utterance('assistant', 'Milou AI', () => 'This is an assistant message')
     // This design is in progress.
     // .toolInvocation(
     //   'toolName',
