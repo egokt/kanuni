@@ -1,0 +1,11 @@
+// This file is for building the CommonJS version of the project.
+// It's intended to be used when linking the package using `npm link`
+// or `yarn link` when developing dependent packages locally.
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "outDir": "./build-cjs"
+  }
+}

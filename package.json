@@ -11,6 +11,8 @@
     "build": "tsc",
     "build-watch": "tsc -w",
     "build-npm": "npm run build && cp package.json LICENSE.md README.md build",
+    "build-cjs": "tsc --project tsconfig.cjs.json",
+    "build-for-npm-link": "npm run build-cjs && cp package.json LICENSE.md README.md build-cjs",
     "test": "jest",
     "test-watch": "jest --watch",
     "compile-type-tests": "tsc --project tsconfig.compile-tests.json",
