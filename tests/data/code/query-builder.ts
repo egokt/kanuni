@@ -1,5 +1,5 @@
 import z from "zod";
-import { Kanuni, TextualMarkdownFormatter } from "../../../src/index.js";
+import { Kanuni, TextualMarkdownFormatter, withDescription } from "../../../src/index.js";
 
 
 // Should be ok without memory and output
@@ -35,7 +35,15 @@ const query = Kanuni.newQuery<{ title: string }>()
     // )
   )
   .output(o => o.json({
-    reasoning: z.string(),
+    reasoning: z.string().describe(withDescription({
+      title: 'Reasoning',
+      description: 'The reasoning behind the assistant\'s response.',
+    })),
+    type: z.string().describe(withDescription({
+      title: 'Type',
+      description: 'The type of the response, e.g. "text", "image"',
+      exampleValues: ['text', 'image'],
+    })),
     result: z.string(),
   }))
   .build({ title: 'My Title' })

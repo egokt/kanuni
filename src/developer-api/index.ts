@@ -40,6 +40,7 @@ export {
 } from "./output-builder.js";
 export type {
   JsonOutput,
+  OutputSchemaDescription,
   Query,
   TextOutput,
 } from "./types.js";

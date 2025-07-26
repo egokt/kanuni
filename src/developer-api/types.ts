@@ -24,3 +24,9 @@ export type JsonOutput<T extends Record<string, any> = Record<string, any>> = {
   schemaName: string;
   schema: ZodObject<T>;
 };
+
+export type OutputSchemaDescription = {
+  title?: string;
+  description?: string;
+  exampleValues?: string[];
+};

@@ -1,5 +1,8 @@
 export { Kanuni } from "./kanuni.js";
-export { TextualMarkdownFormatter } from "./implementation/index.js";
+export {
+  TextualMarkdownFormatter,
+  withDescription,
+} from "./implementation/index.js";
 
 export type {
   Formatter,
