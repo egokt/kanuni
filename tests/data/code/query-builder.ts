@@ -34,7 +34,7 @@ const query = Kanuni.newQuery<{ title: string }>()
     //   'success', // TODO: result status, e.g. 'success' or 'error', - add error message if status is 'error' (optional?)
     // )
   )
-  .output(o => o.json({
+  .outputJson(z.strictObject({
     reasoning: z.string().describe(withDescription({
       title: 'Reasoning',
       description: 'The reasoning behind the assistant\'s response.',

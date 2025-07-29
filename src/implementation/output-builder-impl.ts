@@ -1,36 +1,42 @@
-import z, { ZodSchema } from "zod";
-import {
-  OutputBuilder,
-  TextOutput,
-  JsonOutput,
-} from "../developer-api/index.js";
+// import { ZodObject } from "zod";
+// import {
+//   OutputBuilder,
+//   TextOutput,
+//   JsonOutput,
+//   TextOutputBuilder,
+//   JsonOutputBuilder,
+// } from "../developer-api/index.js";
 
-export class OutputBuilderImpl<Schema extends Record<string, ZodSchema>> implements OutputBuilder<Schema> {
-  private data: TextOutput | JsonOutput<Schema> | null;
+// export class OutputBuilderImpl<
+//   OutputType extends (Record<string, any> | string)
+// > implements TextOutputBuilder, JsonOutputBuilder<OutputType> {
+//   private data: (OutputType extends Record<string, any> ? JsonOutput<OutputType> : TextOutput) | null;
 
-  constructor() {
-    this.data = null;
-  }
+//   constructor() {
+//     this.data = null;
+//   }
 
-  text(): OutputBuilderImpl<Schema> {
-    this.data = { type: "output-text" };
-    return this;
-  }
+//   text: () => OutputBuilderImpl<string> = () => {
+//     this.data = { type: "output-text" } as TextOutput;
+//     return this as OutputBuilderImpl<string>;
+//   }
 
-  json(schema: Schema, schemaName: string = "response_schema"): OutputBuilderImpl<Schema> {
-    const zodObjectSchema = z.strictObject(schema);
-    this.data = {
-      type: "output-json",
-      schemaName,
-      schema: zodObjectSchema,
-    };
-    return this;
-  }
+//   json(
+//     schema: ZodObject<OutputType extends string ? {} : OutputType>,
+//     schemaName: string = "response_schema"
+//   ): OutputBuilderImpl<OutputType> {
+//     this.data = {
+//       type: "output-json",
+//       schemaName,
+//       schema,
+//     };
+//     return this;
+//   }
 
-  build(): TextOutput | JsonOutput<Schema> {
-    if (!this.data) {
-      throw new Error("OutputBuilder must be configured with at least one output type.");
-    }
-    return this.data;
-  }
-}
+//   build(): TextOutput | JsonOutput<OutputType extends string ? {} : OutputType> {
+//     if (!this.data) {
+//       throw new Error("OutputBuilder must be configured with at least one output type.");
+//     }
+//     return this.data;
+//   }
+// }

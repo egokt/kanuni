@@ -28,7 +28,7 @@ import { OutputSchemaDescription } from "../developer-api/index.js";
  * @param description.description - A description of the output schema.
  * @param description.exampleValues - An array of example values for the output schema.
  * @returns A JSON string representation of the description object that can be
- *   passed to ZodSchema.describe function. Kanuni formatters should parse this
+ *   passed to ZodSchema.describe function. Kanuni formatters may parse this
  *   string and set the description of the output schema accordingly.
  */
 export function withDescription(description: OutputSchemaDescription): string {

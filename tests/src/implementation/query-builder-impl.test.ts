@@ -15,6 +15,7 @@ describe("QueryBuilderImpl", () => {
           }),
         ],
       },
+      output: { type: 'output-text' as const },
     });
   });
 
@@ -43,6 +44,7 @@ describe("QueryBuilderImpl", () => {
           },
         ],
       },
+      output: { type: 'output-text' as const },
     });
   });
 
@@ -54,6 +56,7 @@ describe("QueryBuilderImpl", () => {
         type: "prompt",
         contents: [],
       },
+      output: { type: 'output-text' as const },
     });
   });
 

@@ -33,10 +33,15 @@ export type {
   TableRowBuilderWoHeader,
   TableRowBuilderFunction,
 } from "./prompt/index.js";
-export { QueryBuilder } from "./query-builder.js";
 export {
-  OutputBuilder,
+  JsonReturningQueryBuilder,
+  TextReturningQueryBuilder,
+  QueryBuilder,
+} from "./query-builder.js";
+export {
+  JsonOutputBuilder,
   OutputBuilderFunction,
+  TextOutputBuilder,
 } from "./output-builder.js";
 export type {
   JsonOutput,

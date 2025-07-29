@@ -204,6 +204,7 @@ describe("TextualMarkdownFormatter.format", () => {
         type: "prompt",
         contents: [],
       },
+      output: { type: 'output-text' as const },
     } as Query;
     expect(formatter.format(query)).toBe("");
   });

@@ -53,7 +53,7 @@ export class MemoryBuilderImpl<
     return this;
   }
 
-  build(data: Params): Memory {
+  build(data: Params): Memory<Role> {
     const contents = this.memoryData
       .map((datum) => {
         const itemContents = datum.func(data);
@@ -63,7 +63,7 @@ export class MemoryBuilderImpl<
               role: datum.role,
               contents: itemContents,
               ...(datum.name !== undefined && datum.name !== '' && { name: datum.name }),
-            } as MemoryItem)
+            } as MemoryItem<Role>)
           : null;
       })
       .filter((itemOrNull) => itemOrNull !== null);

@@ -120,7 +120,7 @@ export class SectionBuilderImpl<Params extends Record<string, any> = {}>
       true,
     );
 
-  build(data: Params, memory?: Memory): Section {
+  build<Role extends string>(data: Params, memory?: Memory<Role>): Section {
     const contents = this.builderData
       .map((datum) => {
         if (datum.type === "section" && datum.isMemorySection) {
