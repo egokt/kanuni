@@ -5,6 +5,7 @@ import {
   Paragraph,
   Prompt,
   Query,
+  RoleDefault,
   Section,
   Table,
   TableCell,
@@ -16,6 +17,14 @@ type TextualMarkdownFormatterConfig = {
   indentationString?: string;
   unnumberedListItemPrefix?: string;
   memoryIntroductionText?: string;
+  excludes?: {
+    memory?: boolean; // if set to true, memory will not be included in the formatted output
+
+    // TODO: use the following line when output schema description is implemented
+    // outputSchema?: boolean; // if set to true, output schema description will not be included
+
+    // TODO: add tools here later
+  }
 };
 
 type TextualMarkdownFormatterParams = {};
@@ -24,25 +33,30 @@ const DEFAULT_INDENTATION_STRING = "  ";
 const DEFAULT_UNNUMBERED_LIST_ITEM_PREFIX = "- ";
 const DEFAULT_MEMORY_INTRODUCTION_TEXT = "History: ";
 
-export class TextualMarkdownFormatter
-  implements Formatter<TextualMarkdownFormatterParams, string>
+export class TextualMarkdownFormatter<
+  OutputSchema extends Record<string, any> = Record<string, any>,
+  Role extends string = RoleDefault
+> implements Formatter<TextualMarkdownFormatterParams, string, OutputSchema, Role>
 {
-  private indentationString: string = DEFAULT_INDENTATION_STRING;
-  private unnumberedListItemPrefix: string =
-    DEFAULT_UNNUMBERED_LIST_ITEM_PREFIX;
-  private memoryIntroductionText: string = DEFAULT_MEMORY_INTRODUCTION_TEXT;
+  private indentationString: string;
+  private unnumberedListItemPrefix: string;
+  private memoryIntroductionText: string;
+  private excludes: NonNullable<TextualMarkdownFormatterConfig["excludes"]>;
 
   constructor({
     indentationString = DEFAULT_INDENTATION_STRING,
     unnumberedListItemPrefix = DEFAULT_UNNUMBERED_LIST_ITEM_PREFIX,
     memoryIntroductionText = DEFAULT_MEMORY_INTRODUCTION_TEXT,
+    excludes = {},
   }: TextualMarkdownFormatterConfig = {}) {
     this.indentationString = indentationString;
     this.unnumberedListItemPrefix = unnumberedListItemPrefix;
     this.memoryIntroductionText = memoryIntroductionText;
+    this.excludes = excludes;
   }
 
-  format(query: Query, _params?: TextualMarkdownFormatterParams): string {
+  // TODO: Future work: this currently does not support output schema description for json text output.
+  format(query: Query<any, Role>, _params?: TextualMarkdownFormatterParams): string {
     const prompt = this.formatPrompt(query.prompt);
     return prompt;
   }
@@ -96,6 +110,10 @@ export class TextualMarkdownFormatter
   }
 
   private formatSection(section: Section, level = 0): string {
+    if (this.excludes.memory && section.memory) {
+      return '';
+    }
+
     let str = section.heading
       ? `${"#".repeat(level + 1)} ${section.heading}`
       : "";
@@ -117,6 +135,7 @@ export class TextualMarkdownFormatter
             );
         }
       })
+      .filter(content => content.trim() !== '') // filter out empty strings
       .join("\n\n");
 
     if (section.memory) {

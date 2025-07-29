@@ -15,13 +15,14 @@ describe("QueryBuilderImpl", () => {
           }),
         ],
       },
+      output: { type: 'output-text' as const },
     });
   });
 
   it("returns correct prompt and memory when both prompt and memory are set", () => {
     const builder = new QueryBuilderImpl<{ foo: string }>();
     builder.prompt((p) => p.paragraph`Prompt: ${"foo"}`);
-    builder.memory((m) => m.message("user", (d) => `${d.foo}`));
+    builder.memory((m) => m.utterance("user", (d) => `${d.foo}`));
     const result = builder.build({ foo: "bar" });
     expect(result).toEqual({
       prompt: {
@@ -43,6 +44,7 @@ describe("QueryBuilderImpl", () => {
           },
         ],
       },
+      output: { type: 'output-text' as const },
     });
   });
 
@@ -54,6 +56,7 @@ describe("QueryBuilderImpl", () => {
         type: "prompt",
         contents: [],
       },
+      output: { type: 'output-text' as const },
     });
   });
 
@@ -86,7 +89,7 @@ describe("QueryBuilderImpl", () => {
   it("is chainable and builds correctly", () => {
     const builder = new QueryBuilderImpl<{ foo: string }>()
       .prompt((p) => p.paragraph`Chainable: ${"foo"}`)
-      .memory((m) => m.message("assistant", (d) => `Assistant: ${d.foo}`));
+      .memory((m) => m.utterance("assistant", (d) => `Assistant: ${d.foo}`));
     const result = builder.build({ foo: "bar" });
     expect(result.prompt.contents[0]).toEqual(
       expect.objectContaining({ type: "paragraph", content: "Chainable: bar" }),

@@ -1,4 +1,4 @@
-export type RoleDefault = "user" | "assistant";
+import { RoleDefault } from "./types.js";
 
 export type MemoryBuilderFunction<
   Params extends Record<string, any> = {},
@@ -11,8 +11,13 @@ export interface MemoryBuilder<
   Params extends Record<string, any> = {},
   Role extends string = RoleDefault,
 > {
-  message(
+  utterance(
     role: Role,
+    messageBuilderFunction: (data: Params) => string | undefined | null,
+  ): MemoryBuilder<Params, Role>;
+  utterance(
+    role: Role,
+    name: string,
     messageBuilderFunction: (data: Params) => string | undefined | null,
   ): MemoryBuilder<Params, Role>;
 }

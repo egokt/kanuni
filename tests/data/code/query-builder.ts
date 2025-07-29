@@ -1,5 +1,5 @@
 import z from "zod";
-import { Kanuni, TextualMarkdownFormatter } from "../../../src/index.js";
+import { Kanuni, TextualMarkdownFormatter, withDescription } from "../../../src/index.js";
 
 
 // Should be ok without memory and output
@@ -23,9 +23,9 @@ const query = Kanuni.newQuery<{ title: string }>()
     //@ts-expect-error
     .heading`Section ${'title'}`
   )
-  .memory<'user' | 'assistant'>(m => m
-    .message('user', () => 'This is a user message')
-    .message('assistant', () => 'This is an assistant message')
+  .memory(m => m
+    .utterance('user', () => 'This is a user message')
+    .utterance('assistant', 'Milou AI', () => 'This is an assistant message')
     // This design is in progress.
     // .toolInvocation(
     //   'toolName',
@@ -34,8 +34,16 @@ const query = Kanuni.newQuery<{ title: string }>()
     //   'success', // TODO: result status, e.g. 'success' or 'error', - add error message if status is 'error' (optional?)
     // )
   )
-  .output(o => o.json({
-    reasoning: z.string(),
+  .outputJson(z.strictObject({
+    reasoning: z.string().describe(withDescription({
+      title: 'Reasoning',
+      description: 'The reasoning behind the assistant\'s response.',
+    })),
+    type: z.string().describe(withDescription({
+      title: 'Type',
+      description: 'The type of the response, e.g. "text", "image"',
+      exampleValues: ['text', 'image'],
+    })),
     result: z.string(),
   }))
   .build({ title: 'My Title' })

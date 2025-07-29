@@ -9,9 +9,10 @@ type MemoryBuilderImplMessageDatum<
   Params extends Record<string, any> = {},
   Role extends string = RoleDefault,
 > = {
-  type: "message";
+  type: "utterance";
   func: (data: Params) => string | undefined | null;
   role: Role;
+  name?: string;
 };
 
 export class MemoryBuilderImpl<
@@ -25,19 +26,34 @@ export class MemoryBuilderImpl<
     this.memoryData = [];
   }
 
-  message(
+  utterance(
     role: Role,
-    messageBuilderFunction: (data: Params) => string | undefined | null,
+    nameOrMessageBuilderFunction: string | ((data: Params) => string | undefined | null),
+    messageBuilderFunction?: (data: Params) => string | undefined | null,
   ): MemoryBuilder<Params, Role> {
-    this.memoryData.push({
-      type: "message",
-      func: messageBuilderFunction,
-      role,
-    });
+    const isNameProvided = typeof nameOrMessageBuilderFunction === "string";
+
+    if (isNameProvided) {
+      if (messageBuilderFunction === undefined) {
+        throw new Error("Message builder function must be provided when name is specified.");
+      }
+      this.memoryData.push({
+        type: "utterance",
+        func: messageBuilderFunction,
+        role,
+        name: nameOrMessageBuilderFunction,
+      });
+    } else {
+      this.memoryData.push({
+        type: "utterance",
+        func: nameOrMessageBuilderFunction,
+        role,
+      });
+    }
     return this;
   }
 
-  build(data: Params): Memory {
+  build(data: Params): Memory<Role> {
     const contents = this.memoryData
       .map((datum) => {
         const itemContents = datum.func(data);
@@ -46,7 +62,8 @@ export class MemoryBuilderImpl<
               type: "utterance",
               role: datum.role,
               contents: itemContents,
-            } as MemoryItem)
+              ...(datum.name !== undefined && datum.name !== '' && { name: datum.name }),
+            } as MemoryItem<Role>)
           : null;
       })
       .filter((itemOrNull) => itemOrNull !== null);
