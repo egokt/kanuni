@@ -10,22 +10,10 @@ type QBase<Role extends string> = {
   memory?: Memory<Role>;
 };
 
-export type Query<OutputType extends (Record<string, any> | string) = string, Role extends string = RoleDefault> = QBase<Role> & QOutput<OutputType>;
-
-
-// export type Query<
-//   OutputType extends (Record<string, any> | string) = string,
-//   Role extends string = RoleDefault
-// > =
-//   {
-//     prompt: Prompt;
-//     memory?: Memory<Role>;
-//     ...(
-//       OutputType extends Record<string, any>
-//       ? { output: JsonOutput<OutputType> }
-//       : { output?: TextOutput }
-//     )
-//   };
+export type Query<
+  OutputType extends (Record<string, any> | string) = string,
+  Role extends string = RoleDefault
+> = QBase<Role> & QOutput<OutputType>;
 
 export type TextQuery<Role extends string = RoleDefault> = {
   prompt: Prompt;

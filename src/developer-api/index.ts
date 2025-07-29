@@ -38,11 +38,6 @@ export {
   TextReturningQueryBuilder,
   QueryBuilder,
 } from "./query-builder.js";
-export {
-  JsonOutputBuilder,
-  OutputBuilderFunction,
-  TextOutputBuilder,
-} from "./output-builder.js";
 export type {
   JsonOutput,
   OutputSchemaDescription,
