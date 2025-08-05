@@ -7,4 +7,5 @@ export {
 export type {
   Formatter,
   Query,
+  RoleDefault,
 } from "./developer-api/index.js";
