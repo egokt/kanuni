@@ -35,8 +35,9 @@ const DEFAULT_MEMORY_INTRODUCTION_TEXT = "History: ";
 
 export class TextualMarkdownFormatter<
   OutputSchema extends Record<string, any> = Record<string, any>,
-  Role extends string = RoleDefault
-> implements Formatter<TextualMarkdownFormatterParams, string, OutputSchema, Role>
+  Role extends string = RoleDefault,
+  ToolName extends string = string,
+> implements Formatter<TextualMarkdownFormatterParams, string, OutputSchema, Role, ToolName>
 {
   private indentationString: string;
   private unnumberedListItemPrefix: string;
@@ -56,12 +57,12 @@ export class TextualMarkdownFormatter<
   }
 
   // TODO: Future work: this currently does not support output schema description for json text output.
-  format(query: Query<any, Role>, _params?: TextualMarkdownFormatterParams): string {
+  format(query: Query<any, Role, ToolName>, _params?: TextualMarkdownFormatterParams): string {
     const prompt = this.formatPrompt(query.prompt);
     return prompt;
   }
 
-  private formatPrompt(prompt: Prompt): string {
+  private formatPrompt(prompt: Prompt<Role, ToolName>): string {
     const str = prompt.contents
       .map((content) => {
         switch (content.type) {
@@ -109,7 +110,7 @@ export class TextualMarkdownFormatter<
     return str;
   }
 
-  private formatSection(section: Section, level = 0): string {
+  private formatSection(section: Section<Role, ToolName>, level = 0): string {
     if (this.excludes.memory && section.memory) {
       return '';
     }
@@ -202,7 +203,7 @@ export class TextualMarkdownFormatter<
     return str;
   }
 
-  private formatMemory(memory: Memory): string {
+  private formatMemory(memory: Memory<Role, ToolName>): string {
     let str =
       this.memoryIntroductionText.length === 0
         ? ""
@@ -210,11 +211,30 @@ export class TextualMarkdownFormatter<
 
     str += memory.contents
       .map((item) => {
-        const snakeCaseRole = item.role.replaceAll(" ", "_").toLowerCase();
-        const openingTag = `<${snakeCaseRole}>`;
-        const closingTag = `</${snakeCaseRole}>`;
-        return `${openingTag}\n${item.contents}\n${closingTag}`;
+        switch (item.type) {
+          case 'utterance':
+            const snakeCaseRole = item.role.replaceAll(" ", "_").toLowerCase();
+            const openingTag = `<${snakeCaseRole}>`;
+            const closingTag = `</${snakeCaseRole}>`;
+            return `${openingTag}\n${item.contents}\n${closingTag}`;
+          case 'tool-call':
+            const toolCallData = {
+              toolCallId: item.toolCallId,
+              toolName: item.toolName,
+              arguments: item.arguments,
+            };
+            return `<tool_call>\n${JSON.stringify(toolCallData, null, 2)}\n</tool_call>`;
+          case 'tool-call-result':
+            const toolCallResultData = {
+              toolCallId: item.toolCallId,
+              result: item.result,
+            };
+            return `<tool_coll_result>\n${JSON.stringify(toolCallResultData, null, 2)}\n</tool_call_result>`
+          default:
+            return null;
+        }
       })
+      .filter(itemStringOrNull => itemStringOrNull !== null)
       .join("\n");
 
     return str;

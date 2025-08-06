@@ -12,13 +12,13 @@ import {
   ContentBuilderImplListDatum,
   ContentBuilderImplParagraphDatum,
   ContentBuilderImplTableDatum,
-} from "./context-builder-impl.js";
+} from "./content-builder-impl.js";
 import { compile } from "./string-template-helpers.js";
 
-export type SectionBuilderImplSectionDatum<Params extends Record<string, any>> =
+export type SectionBuilderImplSectionDatum<Params extends Record<string, any>, Role extends string, ToolName extends string> =
   {
     type: "section";
-    func: (data: Params) => Section;
+    func: (data: Params) => Section<Role, ToolName>;
     isMemorySection?: boolean;
   };
 
@@ -28,16 +28,16 @@ export type SectionBuilderImplHeadingDatum<Params extends Record<string, any>> =
     func: (data: Params) => string;
   };
 
-type SectionBuilderImplDatum<Params extends Record<string, any>> =
+type SectionBuilderImplDatum<Params extends Record<string, any>, Role extends string, ToolName extends string> =
   | ContentBuilderImplParagraphDatum<Params>
   | ContentBuilderImplTableDatum<Params>
   | ContentBuilderImplListDatum<Params>
-  | SectionBuilderImplSectionDatum<Params>;
+  | SectionBuilderImplSectionDatum<Params, Role, ToolName>;
 
-export class SectionBuilderImpl<Params extends Record<string, any> = {}>
+export class SectionBuilderImpl<Params extends Record<string, any>, Role extends string, ToolName extends string>
   implements SectionBuilder<Params>
 {
-  private builderData: SectionBuilderImplDatum<Params>[];
+  private builderData: SectionBuilderImplDatum<Params, Role, ToolName>[];
   private headingData?: SectionBuilderImplHeadingDatum<Params>;
 
   constructor() {
@@ -96,7 +96,7 @@ export class SectionBuilderImpl<Params extends Record<string, any> = {}>
   section: (
     builderFunction: SectionBuilderFunction<Params>,
   ) => SectionBuilder<Params> = (builderFunction) =>
-    SectionBuilderImpl.defineSection<Params, SectionBuilder<Params>>(
+    SectionBuilderImpl.defineSection<Params, SectionBuilder<Params>, Role, ToolName>(
       this,
       this.builderData.push.bind(this.builderData),
       builderFunction,
@@ -108,7 +108,7 @@ export class SectionBuilderImpl<Params extends Record<string, any> = {}>
   memorySection: (
     builderFunction: SectionBuilderFunction<Params>,
   ) => SectionBuilder<Params> = (builderFunction) =>
-    SectionBuilderImpl.defineSection<Params, SectionBuilder<Params>>(
+    SectionBuilderImpl.defineSection<Params, SectionBuilder<Params>, Role, ToolName>(
       this,
       (builderData) =>
         this.builderData.push({
@@ -120,7 +120,7 @@ export class SectionBuilderImpl<Params extends Record<string, any> = {}>
       true,
     );
 
-  build<Role extends string>(data: Params, memory?: Memory<Role>): Section {
+  build(data: Params, memory?: Memory<Role, ToolName>): Section<Role, ToolName> {
     const contents = this.builderData
       .map((datum) => {
         if (datum.type === "section" && datum.isMemorySection) {
@@ -135,7 +135,7 @@ export class SectionBuilderImpl<Params extends Record<string, any> = {}>
                   type: "memory",
                   contents: [],
                 },
-          } as Section;
+          } as Section<Role, ToolName>;
         } else {
           return datum.func(data);
         }
@@ -154,15 +154,17 @@ export class SectionBuilderImpl<Params extends Record<string, any> = {}>
   static defineSection<
     Params extends Record<string, any>,
     Builder extends SectionBuilder<Params> | SectionContentBuilder<Params>,
+    Role extends string,
+    ToolName extends string,
   >(
     builder: Builder,
     pushToBuilderData: (
-      builderData: SectionBuilderImplSectionDatum<Params>,
+      builderData: SectionBuilderImplSectionDatum<Params, Role, ToolName>,
     ) => void,
     builderFunction: SectionBuilderFunction<Params>,
     isMemorySection?: boolean,
   ): Builder {
-    const newBuilder = new SectionBuilderImpl<Params>();
+    const newBuilder = new SectionBuilderImpl<Params, Role, ToolName>();
     const builderOrNull = builderFunction(newBuilder);
     if (builderOrNull !== undefined && builderOrNull !== null) {
       pushToBuilderData({

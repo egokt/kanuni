@@ -1,11 +1,11 @@
 import { Memory } from "../memory/types.js";
 
 // This is one part in the prompt
-export type Section = {
+export type Section<Role extends string, ToolName extends string> = {
   type: "section";
   heading?: string;
-  contents: (ContentPart | Section)[];
-  memory?: Memory;
+  contents: (ContentPart | Section<Role, ToolName>)[];
+  memory?: Memory<Role, ToolName>;
 };
 
 export type ContentPart = Paragraph | Table | List;
@@ -54,7 +54,7 @@ export type ListItem = {
   content: Paragraph | List;
 };
 
-export type Prompt = {
+export type Prompt<Role extends string, ToolName extends string> = {
   type: "prompt";
-  contents: (ContentPart | Section)[];
+  contents: (ContentPart | Section<Role, ToolName>)[];
 };

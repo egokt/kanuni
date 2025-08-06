@@ -6,6 +6,8 @@ export {
 
 export type {
   Formatter,
+  Memory,
+  MemoryBuilder,
   Query,
   RoleDefault,
 } from "./developer-api/index.js";

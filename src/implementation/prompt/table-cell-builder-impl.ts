@@ -10,7 +10,7 @@ import {
   ContentBuilderImplListDatum,
   ContentBuilderImplParagraphDatum,
   ContentBuilderImplTableDatum,
-} from "./context-builder-impl.js";
+} from "./content-builder-impl.js";
 
 type TableCellBuilderImplDatum<Params extends Record<string, any>> =
   | ContentBuilderImplParagraphDatum<Params>

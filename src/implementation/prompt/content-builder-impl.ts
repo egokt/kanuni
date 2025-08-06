@@ -36,7 +36,7 @@ type ContentBuilderImplDatum<Params extends Record<string, any>> =
   | ContentBuilderImplTableDatum<Params>
   | ContentBuilderImplListDatum<Params>;
 
-export class ContentBuilderImpl<Params extends Record<string, any> = {}>
+export class ContentBuilderImpl<Params extends Record<string, any>, Role extends string, ToolName extends string>
   implements ContentBuilder<Params>
 {
   private builderData: ContentBuilderImplDatum<Params>[];
@@ -80,7 +80,7 @@ export class ContentBuilderImpl<Params extends Record<string, any> = {}>
       builderFunction,
     );
 
-  build(data: Params): Section {
+  build(data: Params): Section<Role, ToolName> {
     const contents = this.builderData
       .map((datum) => {
         switch (datum.type) {

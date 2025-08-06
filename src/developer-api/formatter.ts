@@ -4,8 +4,9 @@ import { Query } from "./types.js";
 export interface Formatter<
   Params extends Record<string, any>,
   Result,
-  OutputType extends (Record<string, any> | string) = string,
+  OutputType extends (Record<string, any> | string),
   Role extends string = RoleDefault,
+  ToolName extends string = string,
 > {
-  format: (query: Query<OutputType, Role>, params?: Params) => Result;
+  format: (query: Query<OutputType, Role, ToolName>, params?: Params) => Result;
 }
