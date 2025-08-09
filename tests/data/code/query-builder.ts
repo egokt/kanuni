@@ -1,8 +1,9 @@
 import z from "zod";
-import { Kanuni, TextualMarkdownFormatter, withDescription } from "../../../src/index.js";
+import { Kanuni, RoleDefault, TextualMarkdownFormatter, withDescription } from "../../../src/index.js";
+import { Tool } from "../../../src/developer-api/types.js";
 
 
-// Should be ok without memory and output
+// Should be ok with memory and output
 Kanuni.newQuery<{ title: string }>()
   .prompt(p => p.paragraph`This is a simple paragraph with title: ${'title'}`)
   .build({ title: 'My Title' });
@@ -49,3 +50,18 @@ const query = Kanuni.newQuery<{ title: string }>()
   .build({ title: 'My Title' })
 
 new TextualMarkdownFormatter().format(query);
+
+
+// Should align tools and tools type param
+Kanuni.newQuery < {}, RoleDefault, Tool<'tool1', { a: string; }> | Tool<'tool2', {}>>()
+  .prompt(p => p
+    .paragraph`Hello`
+  )
+  .tools({
+    tool1: {
+      name: 'tool1',
+      description: 'something',
+      parameters: z.strictObject({a: z.string()})
+    }
+
+  })

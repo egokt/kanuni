@@ -1,60 +1,68 @@
 import { MemoryBuilder, MemoryBuilderFunction } from "./memory/index.js";
 import { SectionBuilderWoMemoryFunction } from "./prompt/section-builder.js";
-import { Query } from "./types.js";
+import { Query, Tool, ToolRegistry } from "./types.js";
 import { ZodType } from "zod";
 
 export interface QueryBuilder<
   Params extends Record<string, any>,
   Role extends string,
-  ToolName extends string,
-> extends TextReturningQueryBuilder<Params, Role, ToolName> { };
+  ToolsType extends Tool<any, any>
+> extends TextReturningQueryBuilder<Params, Role, ToolsType> { };
 
 export interface TextReturningQueryBuilder<
   Params extends Record<string, any>,
   Role extends string,
-  ToolName extends string,
+  ToolsType extends Tool<any, any>,
 > {
   prompt(
     promptBuilderFunction: SectionBuilderWoMemoryFunction<Params>,
-  ): TextReturningQueryBuilder<Params, Role, ToolName>;
+  ): TextReturningQueryBuilder<Params, Role, ToolsType>;
 
   memory(
-    memoryBuilderFunction: MemoryBuilderFunction<Params, Role, ToolName>,
-  ): TextReturningQueryBuilder<Params, Role, ToolName>;
+    memoryBuilderFunction: MemoryBuilderFunction<Params, Role, ToolsType['name']>,
+  ): TextReturningQueryBuilder<Params, Role, ToolsType['name']>;
   memory(
-    memoryBuilder: MemoryBuilder<Params, Role, ToolName>
-  ): TextReturningQueryBuilder<Params, Role, ToolName>;
+    memoryBuilder: MemoryBuilder<Params, Role, ToolsType['name']>
+  ): TextReturningQueryBuilder<Params, Role, ToolsType>;
 
-  outputText(): TextReturningQueryBuilder<Params, Role, ToolName>;
+  tools(
+    registry: ToolRegistry<ToolsType>
+  ): TextReturningQueryBuilder<Params, Role, ToolsType>;
+
+  outputText(): TextReturningQueryBuilder<Params, Role, ToolsType>;
   outputJson<OutputType extends Record<string, any>>(
     schema: ZodType<OutputType>,
     schemaName?: string,
-  ): JsonReturningQueryBuilder<OutputType, Params, Role, ToolName>;
+  ): JsonReturningQueryBuilder<OutputType, Params, Role, ToolsType>;
 
-  build(data: Params): Query<string, Role, ToolName>;
+  build(data: Params): Query<string, Role, ToolsType['name']>;
 }
 
 export interface JsonReturningQueryBuilder<
   OutputType extends Record<string, any>,
   Params extends Record<string, any>,
   Role extends string,
-  ToolName extends string,
+  ToolsType extends Tool<any, any>,
 > {
   prompt(
     promptBuilderFunction: SectionBuilderWoMemoryFunction<Params>,
-  ): JsonReturningQueryBuilder<OutputType, Params, Role, ToolName>;
+  ): JsonReturningQueryBuilder<OutputType, Params, Role, ToolsType>;
   memory(
-    memoryBuilderFunction: MemoryBuilderFunction<Params, Role, ToolName>,
-  ): JsonReturningQueryBuilder<OutputType, Params, Role, ToolName>;
+    memoryBuilderFunction: MemoryBuilderFunction<Params, Role, ToolsType['name']>,
+  ): JsonReturningQueryBuilder<OutputType, Params, Role, ToolsType>;
   memory(
-    memoryBuilder: MemoryBuilder<Params, Role, ToolName>
-  ): JsonReturningQueryBuilder<OutputType, Params, Role, ToolName>;
+    memoryBuilder: MemoryBuilder<Params, Role, ToolsType['name']>
+  ): JsonReturningQueryBuilder<OutputType, Params, Role, ToolsType>;
 
-  outputText(): TextReturningQueryBuilder<Params, Role, ToolName>;
+  tools(
+    registry: ToolRegistry<ToolsType>
+  ): JsonReturningQueryBuilder<OutputType, Params, Role, ToolsType>;
+
+  outputText(): TextReturningQueryBuilder<Params, Role, ToolsType>;
   outputJson<NewOutputType extends Record<string, any>>(
     schema: ZodType<NewOutputType>,
     schemaName?: string,
-  ): JsonReturningQueryBuilder<NewOutputType, Params, Role, ToolName>;
+  ): JsonReturningQueryBuilder<NewOutputType, Params, Role, ToolsType>;
 
-  build(data: Params): Query<OutputType, Role, ToolName>;
+  build(data: Params): Query<OutputType, Role, ToolsType['name']>;
 }

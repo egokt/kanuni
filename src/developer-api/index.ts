@@ -43,5 +43,6 @@ export type {
   OutputSchemaDescription,
   Query,
   TextOutput,
+  Tool,
 } from "./types.js";
 export type { Formatter } from "./formatter.js";

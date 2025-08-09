@@ -8,6 +8,7 @@ type QOutput<OutputType extends (Record<string, any> | string)> = OutputType ext
 type QBase<Role extends string, ToolName extends string> = {
   prompt: Prompt<Role, ToolName>;
   memory?: Memory<Role, ToolName>;
+  tools?: Tool<ToolName, any>[], 
 };
 
 export type Query<
@@ -46,3 +47,20 @@ export type OutputSchemaDescription = {
   description?: string;
   exampleValues?: string[];
 };
+
+export type Tool<Name extends string, Params extends Record<string, any>> = {
+  name: Name;
+  description: string;
+  parameters: ZodType<Params>;
+};
+
+export type ToolRegistry<ToolsType extends Tool<any, any>> =
+  ToolsType extends never
+    ? {}
+    : {
+      [K in ToolsType['name']]: Extract<
+        ToolsType,
+        { name: K }
+      >;
+    };
+
