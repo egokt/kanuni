@@ -1,6 +1,7 @@
 import {
   ListBuilderFunction,
   Memory,
+  PromptContentWoMemoryBuilder,
   Section,
   SectionBuilder,
   SectionBuilderFunction,
@@ -102,24 +103,6 @@ export class SectionBuilderImpl<Params extends Record<string, any>, Role extends
       builderFunction,
     );
 
-  // Note: it will be checked at the query builder level that there is only
-  // one memory section in the query. So we allow multiple memory sections
-  // in this builder.
-  memorySection: (
-    builderFunction: SectionBuilderFunction<Params>,
-  ) => SectionBuilder<Params> = (builderFunction) =>
-    SectionBuilderImpl.defineSection<Params, SectionBuilder<Params>, Role, ToolName>(
-      this,
-      (builderData) =>
-        this.builderData.push({
-          type: builderData.type,
-          func: builderData.func,
-          isMemorySection: true,
-        }),
-      builderFunction,
-      true,
-    );
-
   build(data: Params, memory?: Memory<Role, ToolName>): Section<Role, ToolName> {
     const contents = this.builderData
       .map((datum) => {
@@ -153,7 +136,7 @@ export class SectionBuilderImpl<Params extends Record<string, any>, Role extends
 
   static defineSection<
     Params extends Record<string, any>,
-    Builder extends SectionBuilder<Params> | SectionContentBuilder<Params>,
+    Builder extends SectionBuilder<Params> | SectionContentBuilder<Params> | PromptContentWoMemoryBuilder<Params>,
     Role extends string,
     ToolName extends string,
   >(

@@ -2,13 +2,18 @@ import z from "zod";
 import { Kanuni, RoleDefault, TextualMarkdownFormatter, withDescription } from "../../../src/index.js";
 import { Tool } from "../../../src/developer-api/types.js";
 
+// *****************************************************************************
+// Should be ok without memory and output
+// prettier-ignore
+const q1 = Kanuni.newQuery<{ title: string }>()
+  .prompt(p => p.paragraph`Hello`)
+  .build({ title: '123' });
 
+new TextualMarkdownFormatter().format(q1);
+
+
+// *****************************************************************************
 // Should be ok with memory and output
-Kanuni.newQuery<{ title: string }>()
-  .prompt(p => p.paragraph`This is a simple paragraph with title: ${'title'}`)
-  .build({ title: 'My Title' });
-
-// Larger example with memory and output
 // prettier-ignore
 const query = Kanuni.newQuery<{ title: string }>()
   .prompt(p => p
@@ -52,8 +57,10 @@ const query = Kanuni.newQuery<{ title: string }>()
 new TextualMarkdownFormatter().format(query);
 
 
+// *****************************************************************************
 // Should align tools and tools type param
-Kanuni.newQuery < {}, RoleDefault, Tool<'tool1', { a: string; }> | Tool<'tool2', {}>>()
+// prettier-ignore
+const q3 = Kanuni.newQuery<{}, RoleDefault, Tool<'tool1', { a: string; }> | Tool<'tool2', {}>>()
   .prompt(p => p
     .paragraph`Hello`
   )
@@ -61,7 +68,9 @@ Kanuni.newQuery < {}, RoleDefault, Tool<'tool1', { a: string; }> | Tool<'tool2',
     tool1: {
       name: 'tool1',
       description: 'something',
-      parameters: z.strictObject({a: z.string()})
+      parameters: z.strictObject({ a: z.string() })
     }
-
   })
+  .build({});
+
+new TextualMarkdownFormatter().format(q3);

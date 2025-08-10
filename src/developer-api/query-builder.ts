@@ -1,5 +1,5 @@
 import { MemoryBuilder, MemoryBuilderFunction } from "./memory/index.js";
-import { SectionBuilderWoMemoryFunction } from "./prompt/section-builder.js";
+import { PromptContentBuilderFunction } from "./prompt/index.js";
 import { Query, Tool, ToolRegistry } from "./types.js";
 import { ZodType } from "zod";
 
@@ -15,7 +15,7 @@ export interface TextReturningQueryBuilder<
   ToolsType extends Tool<any, any>,
 > {
   prompt(
-    promptBuilderFunction: SectionBuilderWoMemoryFunction<Params>,
+    promptBuilderFunction: PromptContentBuilderFunction<Params>,
   ): TextReturningQueryBuilder<Params, Role, ToolsType>;
 
   memory(
@@ -26,7 +26,7 @@ export interface TextReturningQueryBuilder<
   ): TextReturningQueryBuilder<Params, Role, ToolsType>;
 
   tools(
-    registry: ToolRegistry<ToolsType>
+    registry: ToolRegistry<ToolsType>,
   ): TextReturningQueryBuilder<Params, Role, ToolsType>;
 
   outputText(): TextReturningQueryBuilder<Params, Role, ToolsType>;
@@ -45,7 +45,7 @@ export interface JsonReturningQueryBuilder<
   ToolsType extends Tool<any, any>,
 > {
   prompt(
-    promptBuilderFunction: SectionBuilderWoMemoryFunction<Params>,
+    promptBuilderFunction: PromptContentBuilderFunction<Params>,
   ): JsonReturningQueryBuilder<OutputType, Params, Role, ToolsType>;
   memory(
     memoryBuilderFunction: MemoryBuilderFunction<Params, Role, ToolsType['name']>,
@@ -55,7 +55,7 @@ export interface JsonReturningQueryBuilder<
   ): JsonReturningQueryBuilder<OutputType, Params, Role, ToolsType>;
 
   tools(
-    registry: ToolRegistry<ToolsType>
+    registry: ToolRegistry<ToolsType>,
   ): JsonReturningQueryBuilder<OutputType, Params, Role, ToolsType>;
 
   outputText(): TextReturningQueryBuilder<Params, Role, ToolsType>;

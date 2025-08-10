@@ -4,16 +4,16 @@ import {
   JsonOutput,
   Memory,
   MemoryBuilderFunction,
+  PromptContentBuilderFunction,
   Query,
   Section,
-  SectionBuilderWoMemoryFunction,
   TextReturningQueryBuilder,
   MemoryBuilder,
   Tool,
 } from "../developer-api/index.js";
 import { MemoryBuilderImpl } from "./memory/index.js";
-import { SectionBuilderImpl } from "./prompt/index.js";
 import { ToolRegistry } from "../developer-api/types.js";
+import { PromptContentBuilderImpl } from "./prompt/prompt-content-builder-impl.js";
 
 export class TextReturningQueryBuilderImpl<
   Params extends Record<string, any>,
@@ -54,8 +54,8 @@ export class TextReturningQueryBuilderImpl<
     );
   }
 
-  prompt(promptBuilderFunction: SectionBuilderWoMemoryFunction<Params>): TextReturningQueryBuilder<Params, Role, ToolsType> {
-    const newBuilder = new SectionBuilderImpl<Params, Role, ToolsType['name']>();
+  prompt(promptBuilderFunction: PromptContentBuilderFunction<Params>): TextReturningQueryBuilder<Params, Role, ToolsType> {
+    const newBuilder = new PromptContentBuilderImpl<Params, Role, ToolsType['name']>();
     const sectionBuilderOrNull = promptBuilderFunction(newBuilder);
     if (sectionBuilderOrNull !== undefined && sectionBuilderOrNull !== null) {
       this.promptData = (data, memory) => newBuilder.build(data, memory);
@@ -186,8 +186,8 @@ export class JsonReturningQueryBuilderImpl<
     );
   }
 
-  prompt(promptBuilderFunction: SectionBuilderWoMemoryFunction<Params>): JsonReturningQueryBuilder<OutputType, Params, Role, ToolsType> {
-    const newBuilder = new SectionBuilderImpl<Params, Role, ToolsType['name']>();
+  prompt(promptBuilderFunction: PromptContentBuilderFunction<Params>): JsonReturningQueryBuilder<OutputType, Params, Role, ToolsType> {
+    const newBuilder = new PromptContentBuilderImpl<Params, Role, ToolsType['name']>();
     const sectionBuilderOrNull = promptBuilderFunction(newBuilder);
     if (sectionBuilderOrNull !== undefined && sectionBuilderOrNull !== null) {
       this.promptData = (data, memory) => newBuilder.build(data, memory);
