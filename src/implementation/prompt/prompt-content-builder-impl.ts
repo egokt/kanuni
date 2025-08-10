@@ -3,32 +3,29 @@ import {
   Memory,
   PromptContentBuilder,
   PromptContentWoMemoryBuilder,
+  PromptContentWoToolsBuilder,
   Section,
   SectionBuilderFunction,
   SectionWoSubsectionBuilderFunction,
   TableBuilderFunction,
 } from "../../developer-api/index.js";
-import { PromptContentWoToolsBuilder } from "../../developer-api/prompt/prompt-content-builder.js";
+import { } from "../../developer-api/prompt/prompt-content-builder.js";
 import {
   ContentBuilderImpl,
   ContentBuilderImplListDatum,
   ContentBuilderImplParagraphDatum,
   ContentBuilderImplTableDatum,
 } from "./content-builder-impl.js";
-import { SectionBuilderImpl } from "./section-builder-impl.js";
-
-export type PromptContentBuilderImplSectionDatum<Params extends Record<string, any>, Role extends string, ToolName extends string> =
-  {
-    type: "section";
-    func: (data: Params) => Section<Role, ToolName>;
-    isMemorySection?: boolean;
-  };
+import {
+  SectionBuilderImpl,
+  SectionBuilderImplSectionDatum
+} from "./section-builder-impl.js";
 
 type PromptContentBuilderImplDatum<Params extends Record<string, any>, Role extends string, ToolName extends string> =
   | ContentBuilderImplParagraphDatum<Params>
   | ContentBuilderImplTableDatum<Params>
   | ContentBuilderImplListDatum<Params>
-  | PromptContentBuilderImplSectionDatum<Params, Role, ToolName>;
+  | SectionBuilderImplSectionDatum<Params, Role, ToolName>;
 
 export class PromptContentBuilderImpl<
   Params extends Record<string, any>,
@@ -118,7 +115,7 @@ export class PromptContentBuilderImpl<
           this.builderData.push({
             type: builderData.type,
             func: builderData.func,
-            isMemorySection: false,
+            isToolsSection: true,
           }),
         builderFunction,
       );

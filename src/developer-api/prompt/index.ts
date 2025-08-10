@@ -14,6 +14,7 @@ export type {
   PromptContentBuilder,
   PromptContentBuilderFunction,
   PromptContentWoMemoryBuilder,
+  PromptContentWoToolsBuilder,
 } from './prompt-content-builder.js';
 export type {
   TableBuilder,

@@ -87,19 +87,16 @@ export interface SectionWoSubsectionContentBuilder<
 > extends ContentBuilder<Params> {
   paragraph(
     builderFunction: (data: Params) => string,
-  ): SectionContentBuilder<Params>;
+  ): SectionWoSubsectionContentBuilder<Params>;
   paragraph(
     strings: TemplateStringsArray,
     ...keys: (keyof Params)[]
-  ): SectionContentBuilder<Params>;
+  ): SectionWoSubsectionContentBuilder<Params>;
   list(
     builderFunction: ListBuilderFunction<Params>,
-  ): SectionContentBuilder<Params>;
+  ): SectionWoSubsectionContentBuilder<Params>;
   table(
     builderFunction: TableBuilderFunction<Params>,
-  ): SectionContentBuilder<Params>;
-  section(
-    builderFunction: SectionBuilderFunction<Params>,
-  ): SectionContentBuilder<Params>;
+  ): SectionWoSubsectionContentBuilder<Params>;
 }
 

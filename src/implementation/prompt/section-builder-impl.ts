@@ -6,6 +6,7 @@ import {
   SectionBuilder,
   SectionBuilderFunction,
   SectionContentBuilder,
+  SectionWoSubsectionBuilderFunction,
   TableBuilderFunction,
 } from "../../developer-api/index.js";
 import {
@@ -21,6 +22,7 @@ export type SectionBuilderImplSectionDatum<Params extends Record<string, any>, R
     type: "section";
     func: (data: Params) => Section<Role, ToolName>;
     isMemorySection?: boolean;
+    isToolsSection?: boolean;
   };
 
 export type SectionBuilderImplHeadingDatum<Params extends Record<string, any>> =
@@ -144,8 +146,9 @@ export class SectionBuilderImpl<Params extends Record<string, any>, Role extends
     pushToBuilderData: (
       builderData: SectionBuilderImplSectionDatum<Params, Role, ToolName>,
     ) => void,
-    builderFunction: SectionBuilderFunction<Params>,
+    builderFunction: SectionBuilderFunction<Params> | SectionWoSubsectionBuilderFunction<Params>,
     isMemorySection?: boolean,
+    isToolsSection?: boolean,
   ): Builder {
     const newBuilder = new SectionBuilderImpl<Params, Role, ToolName>();
     const builderOrNull = builderFunction(newBuilder);
@@ -154,6 +157,7 @@ export class SectionBuilderImpl<Params extends Record<string, any>, Role extends
         type: "section",
         func: (data: Params) => newBuilder.build(data),
         isMemorySection,
+        isToolsSection,
       });
     }
     return builder;

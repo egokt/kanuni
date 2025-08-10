@@ -17,6 +17,7 @@ export type {
   PromptContentBuilder,
   PromptContentBuilderFunction,
   PromptContentWoMemoryBuilder,
+  PromptContentWoToolsBuilder,
   Section,
   SectionBuilder,
   SectionBuilderFunction,
