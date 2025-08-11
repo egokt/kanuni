@@ -22,6 +22,7 @@ export type SectionBuilderImplSectionDatum<Params extends Record<string, any>> =
     func: (data: Params) => Section;
     isMemorySection?: boolean;
     isToolsSection?: boolean;
+    isOutputSpecsSection?: boolean;
   };
 
 export type SectionBuilderImplHeadingDatum<Params extends Record<string, any>> =
@@ -128,8 +129,6 @@ export class SectionBuilderImpl<Params extends Record<string, any>, Role extends
       builderData: SectionBuilderImplSectionDatum<Params>,
     ) => void,
     builderFunction: SectionBuilderFunction<Params> | SectionWoSubsectionBuilderFunction<Params>,
-    isMemorySection?: boolean,
-    isToolsSection?: boolean,
   ): Builder {
     const newBuilder = new SectionBuilderImpl<Params, Role>();
     const builderOrNull = builderFunction(newBuilder);
@@ -137,8 +136,6 @@ export class SectionBuilderImpl<Params extends Record<string, any>, Role extends
       pushToBuilderData({
         type: "section",
         func: (data: Params) => newBuilder.build(data),
-        isMemorySection,
-        isToolsSection,
       });
     }
     return builder;

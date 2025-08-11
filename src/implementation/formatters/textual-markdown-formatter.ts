@@ -17,11 +17,12 @@ type TextualMarkdownFormatterConfig = {
   indentationString?: string;
   unnumberedListItemPrefix?: string;
   memoryIntroductionText?: string;
-  outputSchemaIntroductionText?: string;
+  outputJsonIntroductionText?: string;
+  outputTextIntroductionText?: string;
   toolsIntroductionText?: string;
   excludes?: {
     memory?: boolean; // if set to true, memory will not be included in the formatted output
-    outputSchema?: boolean; // if set to true, output schema description will not be included
+    outputSpecs?: boolean; // if set to true, output schema description will not be included
     tools?: boolean; // if set to true, tools will not be included in the formatted output
   }
 };
@@ -32,7 +33,8 @@ const DEFAULT_INDENTATION_STRING = "  ";
 const DEFAULT_UNNUMBERED_LIST_ITEM_PREFIX = "- ";
 const DEFAULT_MEMORY_INTRODUCTION_TEXT = "History: ";
 const DEFAULT_TOOLS_INTRODUCTION_TEXT = "Tools available: ";
-const DEFAULT_OUTPUT_SCHEMA_INTRODUCTION_TEXT = "JSON schema for response: ";
+const DEFAULT_OUTPUT_JSON_INTRODUCTION_TEXT = "JSON schema for response: ";
+const DEFAULT_OUTPUT_TEXT_INTRODUCTION_TEXT = "";
 
 export class TextualMarkdownFormatter<
   OutputSchema extends Record<string, any> = Record<string, any>,
@@ -43,7 +45,8 @@ export class TextualMarkdownFormatter<
   private indentationString: string;
   private unnumberedListItemPrefix: string;
   private memoryIntroductionText: string;
-  private outputSchemaIntroductionText: string;
+  private outputJsonIntroductionText: string;
+  private outputTextIntroductionText: string;
   private toolsIntroductionText: string;
   private excludes: NonNullable<TextualMarkdownFormatterConfig["excludes"]>;
 
@@ -51,19 +54,20 @@ export class TextualMarkdownFormatter<
     indentationString = DEFAULT_INDENTATION_STRING,
     unnumberedListItemPrefix = DEFAULT_UNNUMBERED_LIST_ITEM_PREFIX,
     memoryIntroductionText = DEFAULT_MEMORY_INTRODUCTION_TEXT,
-    outputSchemaIntroductionText = DEFAULT_OUTPUT_SCHEMA_INTRODUCTION_TEXT,
+    outputJsonIntroductionText = DEFAULT_OUTPUT_JSON_INTRODUCTION_TEXT,
+    outputTextIntroductionText = DEFAULT_OUTPUT_TEXT_INTRODUCTION_TEXT,
     toolsIntroductionText = DEFAULT_TOOLS_INTRODUCTION_TEXT,
     excludes = {},
   }: TextualMarkdownFormatterConfig = {}) {
     this.indentationString = indentationString;
     this.unnumberedListItemPrefix = unnumberedListItemPrefix;
     this.memoryIntroductionText = memoryIntroductionText;
-    this.outputSchemaIntroductionText = outputSchemaIntroductionText;
+    this.outputJsonIntroductionText = outputJsonIntroductionText;
+    this.outputTextIntroductionText = outputTextIntroductionText;
     this.toolsIntroductionText = toolsIntroductionText;
     this.excludes = excludes;
   }
 
-  // TODO: Future work: this currently does not support output schema description for json text output.
   format(
     query: Query<any, Role, ToolsType>,
     _params?: TextualMarkdownFormatterParams
@@ -80,6 +84,8 @@ export class TextualMarkdownFormatter<
               return this.formatMemorySection(content, query.memory);
             } else if (content.isToolsSection) {
               return this.formatToolsSection(content, query.tools);
+            } else if (content.isOutputSpecsSection) {
+              return this.formatOutputSpecsSection(content, query.output);
             } else {
               return this.formatSection(content);
             }
@@ -175,6 +181,43 @@ export class TextualMarkdownFormatter<
     str += this.formatTools(tools);
     return str;
   }
+
+  private formatOutputSpecsSection(
+    section: Section,
+    outputSpecs: Query<any, Role, ToolsType>['output'],
+  ): string {
+    if (!section.isOutputSpecsSection) {
+      throw new Error('Something is wrong: trying to format a section that is' +
+        ' not marked as an output specs section as if it is an output specs ' +
+        'section.');
+    }
+
+    if (this.excludes.outputSpecs) {
+      return '';
+    }
+
+    let str = this.formatMemoryOrToolsSectionContent(section);
+
+    switch (outputSpecs.type) {
+      case 'output-text':
+        if (this.outputTextIntroductionText.length > 0) {
+          return str + `\n\n${this.outputTextIntroductionText}`;
+        } else {
+          return str;
+        }
+      case 'output-json':
+        // Now format and add the tools
+        str += `\n\n${this.outputJsonIntroductionText}\n\n`;
+        str += zodToJsonSchema(
+          outputSpecs.schema,
+          { name: outputSpecs.schemaName }
+        );
+        return str;
+      default:
+        throw new Error(`Unknown output spec type: ${(outputSpecs as { type: string; }).type}`)
+    }
+  }
+
 
   private formatTools(tools: NonNullable<Query<any, Role, ToolsType>['tools']>): string {
     let toolStrArray = Object.values(tools).map(tool => JSON.stringify({

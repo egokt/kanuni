@@ -5,6 +5,7 @@ export type Section = {
   contents: (ContentPart | Section)[];
   isMemorySection?: boolean;
   isToolsSection?: boolean;
+  isOutputSpecsSection?: boolean;
 };
 
 export type ContentPart = Paragraph | Table | List;

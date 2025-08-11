@@ -3,6 +3,7 @@ import {
   Prompt,
   PromptContentBuilder,
   PromptContentWoMemoryBuilder,
+  PromptContentWoOutputSpecsBuilder,
   PromptContentWoToolsBuilder,
   SectionBuilderFunction,
   SectionWoSubsectionBuilderFunction,
@@ -91,7 +92,6 @@ export class PromptContentBuilderImpl<
             isMemorySection: true,
           }),
         builderFunction,
-        true,
       );
   }
 
@@ -110,6 +110,26 @@ export class PromptContentBuilderImpl<
             type: builderData.type,
             func: builderData.func,
             isToolsSection: true,
+          }),
+        builderFunction,
+      );
+  }
+
+  outputSpecsSection(
+    builderFunction: SectionWoSubsectionBuilderFunction<Params>
+  ): PromptContentWoOutputSpecsBuilder<Params> {
+    return SectionBuilderImpl
+      .defineSection<
+        Params,
+        PromptContentWoOutputSpecsBuilder<Params>,
+        Role
+      >(
+        this,
+        (builderData) =>
+          this.builderData.push({
+            type: builderData.type,
+            func: builderData.func,
+            isOutputSpecsSection: true,
           }),
         builderFunction,
       );
