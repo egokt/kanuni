@@ -1,15 +1,16 @@
 import {
   ListBuilderFunction,
   Memory,
+  Prompt,
   PromptContentBuilder,
   PromptContentWoMemoryBuilder,
   PromptContentWoToolsBuilder,
-  Section,
   SectionBuilderFunction,
   SectionWoSubsectionBuilderFunction,
   TableBuilderFunction,
+  Tool,
+  ToolRegistry,
 } from "../../developer-api/index.js";
-import { } from "../../developer-api/prompt/prompt-content-builder.js";
 import {
   ContentBuilderImpl,
   ContentBuilderImplListDatum,
@@ -21,20 +22,19 @@ import {
   SectionBuilderImplSectionDatum
 } from "./section-builder-impl.js";
 
-type PromptContentBuilderImplDatum<Params extends Record<string, any>, Role extends string, ToolName extends string> =
+type PromptContentBuilderImplDatum<Params extends Record<string, any>> =
   | ContentBuilderImplParagraphDatum<Params>
   | ContentBuilderImplTableDatum<Params>
   | ContentBuilderImplListDatum<Params>
-  | SectionBuilderImplSectionDatum<Params, Role, ToolName>;
+  | SectionBuilderImplSectionDatum<Params>;
 
 export class PromptContentBuilderImpl<
   Params extends Record<string, any>,
   Role extends string,
-  ToolName extends string
+  ToolsType extends Tool<any, any>,
 >
-  implements PromptContentBuilder<Params>
-{
-  private builderData: PromptContentBuilderImplDatum<Params, Role, ToolName>[];
+  implements PromptContentBuilder<Params> {
+  private builderData: PromptContentBuilderImplDatum<Params>[];
 
   constructor() {
     this.builderData = [];
@@ -71,7 +71,7 @@ export class PromptContentBuilderImpl<
   }
 
   section(builderFunction: SectionBuilderFunction<Params>): PromptContentBuilder<Params> {
-    return SectionBuilderImpl.defineSection<Params, PromptContentBuilder<Params>, Role, ToolName>(
+    return SectionBuilderImpl.defineSection<Params, PromptContentBuilder<Params>, Role>(
       this,
       this.builderData.push.bind(this.builderData),
       builderFunction,
@@ -85,8 +85,7 @@ export class PromptContentBuilderImpl<
       .defineSection<
         Params,
         PromptContentWoMemoryBuilder<Params>,
-        Role,
-        ToolName
+        Role
       >(
         this,
         (builderData) =>
@@ -107,8 +106,7 @@ export class PromptContentBuilderImpl<
       .defineSection<
         Params,
         PromptContentWoToolsBuilder<Params>,
-        Role,
-        ToolName
+        Role
       >(
         this,
         (builderData) =>
@@ -121,29 +119,12 @@ export class PromptContentBuilderImpl<
       );
   }
 
-  build(data: Params, memory?: Memory<Role, ToolName>): Section<Role, ToolName> {
+  build(data: Params): Prompt {
     const contents = this.builderData
-      .map((datum) => {
-        if (datum.type === "section" && datum.isMemorySection) {
-          const sectionData = datum.func(data);
-          return {
-            type: "section",
-            contents: sectionData.contents,
-            heading: sectionData.heading,
-            memory: memory
-              ? memory
-              : {
-                  type: "memory",
-                  contents: [],
-                },
-          } as Section<Role, ToolName>;
-        } else {
-          return datum.func(data);
-        }
-      })
+      .map((datum) => datum.func(data))
       .filter((content) => content !== undefined && content !== null);
     return {
-      type: "section",
+      type: "prompt",
       contents,
     };
   }

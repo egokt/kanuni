@@ -5,17 +5,17 @@ import { Memory } from "./memory/index.js";
 type QOutput<OutputType extends (Record<string, any> | string)> = OutputType extends Record<string, any>
   ? { output: JsonOutput<OutputType> }
   : { output: TextOutput };
-type QBase<Role extends string, ToolName extends string> = {
-  prompt: Prompt<Role, ToolName>;
-  memory?: Memory<Role, ToolName>;
-  tools?: Tool<ToolName, any>[], 
+type QBase<Role extends string, ToolsType extends Tool<any, any>> = {
+  prompt: Prompt;
+  memory?: Memory<Role, ToolsType['name']>;
+  tools?: ToolRegistry<ToolsType>;
 };
 
 export type Query<
   OutputType extends (Record<string, any> | string),
   Role extends string,
-  ToolName extends string,
-> = QBase<Role, ToolName> & QOutput<OutputType>;
+  ToolsType extends Tool<any, any> = never,
+> = QBase<Role, ToolsType> & QOutput<OutputType>;
 
 // export type TextQuery<Role extends string = RoleDefault, ToolName extends string = string> = {
 //   prompt: Prompt;

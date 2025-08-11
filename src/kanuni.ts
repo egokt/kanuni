@@ -10,7 +10,7 @@ export class Kanuni {
     return new MemoryBuilderImpl<Params, Role, ToolName>
   }
 
-  static extractMemoryFromQuery<Role extends string, ToolName extends string>(query: Query<any, Role, ToolName>): Memory<Role, ToolName> | undefined {
+  static extractMemoryFromQuery<Role extends string, ToolsType extends Tool<any, any> = never>(query: Query<any, Role, ToolsType>): Memory<Role, ToolsType['name']> | undefined {
     return query.memory;
   }
 }

@@ -47,5 +47,6 @@ export type {
   Query,
   TextOutput,
   Tool,
+  ToolRegistry,
 } from "./types.js";
 export type { Formatter } from "./formatter.js";

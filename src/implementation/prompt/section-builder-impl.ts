@@ -1,6 +1,5 @@
 import {
   ListBuilderFunction,
-  Memory,
   PromptContentWoMemoryBuilder,
   Section,
   SectionBuilder,
@@ -17,10 +16,10 @@ import {
 } from "./content-builder-impl.js";
 import { compile } from "./string-template-helpers.js";
 
-export type SectionBuilderImplSectionDatum<Params extends Record<string, any>, Role extends string, ToolName extends string> =
+export type SectionBuilderImplSectionDatum<Params extends Record<string, any>> =
   {
     type: "section";
-    func: (data: Params) => Section<Role, ToolName>;
+    func: (data: Params) => Section;
     isMemorySection?: boolean;
     isToolsSection?: boolean;
   };
@@ -31,16 +30,16 @@ export type SectionBuilderImplHeadingDatum<Params extends Record<string, any>> =
     func: (data: Params) => string;
   };
 
-type SectionBuilderImplDatum<Params extends Record<string, any>, Role extends string, ToolName extends string> =
+type SectionBuilderImplDatum<Params extends Record<string, any>> =
   | ContentBuilderImplParagraphDatum<Params>
   | ContentBuilderImplTableDatum<Params>
   | ContentBuilderImplListDatum<Params>
-  | SectionBuilderImplSectionDatum<Params, Role, ToolName>;
+  | SectionBuilderImplSectionDatum<Params>;
 
-export class SectionBuilderImpl<Params extends Record<string, any>, Role extends string, ToolName extends string>
+export class SectionBuilderImpl<Params extends Record<string, any>, Role extends string>
   implements SectionBuilder<Params>
 {
-  private builderData: SectionBuilderImplDatum<Params, Role, ToolName>[];
+  private builderData: SectionBuilderImplDatum<Params>[];
   private headingData?: SectionBuilderImplHeadingDatum<Params>;
 
   constructor() {
@@ -99,32 +98,15 @@ export class SectionBuilderImpl<Params extends Record<string, any>, Role extends
   section: (
     builderFunction: SectionBuilderFunction<Params>,
   ) => SectionBuilder<Params> = (builderFunction) =>
-    SectionBuilderImpl.defineSection<Params, SectionBuilder<Params>, Role, ToolName>(
+    SectionBuilderImpl.defineSection<Params, SectionBuilder<Params>, Role>(
       this,
       this.builderData.push.bind(this.builderData),
       builderFunction,
     );
 
-  build(data: Params, memory?: Memory<Role, ToolName>): Section<Role, ToolName> {
+  build(data: Params): Section {
     const contents = this.builderData
-      .map((datum) => {
-        if (datum.type === "section" && datum.isMemorySection) {
-          const sectionData = datum.func(data);
-          return {
-            type: "section",
-            contents: sectionData.contents,
-            heading: sectionData.heading,
-            memory: memory
-              ? memory
-              : {
-                  type: "memory",
-                  contents: [],
-                },
-          } as Section<Role, ToolName>;
-        } else {
-          return datum.func(data);
-        }
-      })
+      .map((datum) => datum.func(data))
       .filter((content) => content !== undefined && content !== null);
     return {
       type: "section",
@@ -140,17 +122,16 @@ export class SectionBuilderImpl<Params extends Record<string, any>, Role extends
     Params extends Record<string, any>,
     Builder extends SectionBuilder<Params> | SectionContentBuilder<Params> | PromptContentWoMemoryBuilder<Params>,
     Role extends string,
-    ToolName extends string,
   >(
     builder: Builder,
     pushToBuilderData: (
-      builderData: SectionBuilderImplSectionDatum<Params, Role, ToolName>,
+      builderData: SectionBuilderImplSectionDatum<Params>,
     ) => void,
     builderFunction: SectionBuilderFunction<Params> | SectionWoSubsectionBuilderFunction<Params>,
     isMemorySection?: boolean,
     isToolsSection?: boolean,
   ): Builder {
-    const newBuilder = new SectionBuilderImpl<Params, Role, ToolName>();
+    const newBuilder = new SectionBuilderImpl<Params, Role>();
     const builderOrNull = builderFunction(newBuilder);
     if (builderOrNull !== undefined && builderOrNull !== null) {
       pushToBuilderData({
