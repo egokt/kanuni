@@ -70,7 +70,7 @@ export class TextReturningQueryBuilderImpl<
     promptBuilderFunction: PromptContentBuilderFunction<Params>
   ): TextReturningQueryBuilder<Params, Role, ToolsType> {
     const newBuilder =
-      new PromptContentBuilderImpl<Params, Role, ToolsType['name']>();
+      new PromptContentBuilderImpl<Params, Role>();
     const sectionBuilderOrNull = promptBuilderFunction(newBuilder);
     if (sectionBuilderOrNull !== undefined && sectionBuilderOrNull !== null) {
       this.promptData =
@@ -114,7 +114,7 @@ export class TextReturningQueryBuilderImpl<
     return this;
   }
 
-  build(data: Params): Query<string, Role, ToolsType['name']> {
+  build(data: Params): Query<string, Role, ToolsType> {
     const memory = this.memoryData === null ? undefined : this.memoryData(data);
     const tools = this.toolsData === null ? undefined : this.toolsData;
     return {
@@ -210,7 +210,7 @@ export class JsonReturningQueryBuilderImpl<
   }
 
   prompt(promptBuilderFunction: PromptContentBuilderFunction<Params>): JsonReturningQueryBuilder<OutputType, Params, Role, ToolsType> {
-    const newBuilder = new PromptContentBuilderImpl<Params, Role, ToolsType['name']>();
+    const newBuilder = new PromptContentBuilderImpl<Params, Role>();
     const sectionBuilderOrNull = promptBuilderFunction(newBuilder);
     if (sectionBuilderOrNull !== undefined && sectionBuilderOrNull !== null) {
       this.promptData = (data) => newBuilder.build(data);
@@ -243,7 +243,7 @@ export class JsonReturningQueryBuilderImpl<
     return this;
   }
 
-  build(data: Params): Query<OutputType, Role, ToolsType['name']> {
+  build(data: Params): Query<OutputType, Role, ToolsType> {
     const memory = this.memoryData === null ? undefined : this.memoryData(data);
     const tools = this.toolsData === null ? undefined : this.toolsData;
     return {
@@ -257,7 +257,7 @@ export class JsonReturningQueryBuilderImpl<
       ...(memory !== undefined ? { memory } : {}),
       ...(tools !== undefined ? { tools } : {}),
       output: this.outputData,
-    } as Query<OutputType, Role, ToolsType['name']>;
+    } as Query<OutputType, Role, ToolsType>;
   }
 }
 

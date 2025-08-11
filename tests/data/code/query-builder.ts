@@ -73,4 +73,4 @@ const q3 = Kanuni.newQuery<{}, RoleDefault, Tool<'tool1', { a: string; }> | Tool
   })
   .build({});
 
-new TextualMarkdownFormatter().format(q3);
+new TextualMarkdownFormatter<{}, RoleDefault, Tool<'tool1', { a: string; }> | Tool<'tool2', {}>>().format(q3);

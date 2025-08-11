@@ -1,6 +1,3 @@
-import { Memory } from "../memory/types.js";
-import { Tool, ToolRegistry } from "../types.js";
-
 // This is one part in the prompt
 export type Section = {
   type: "section";

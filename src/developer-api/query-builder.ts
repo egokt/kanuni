@@ -35,7 +35,7 @@ export interface TextReturningQueryBuilder<
     schemaName?: string,
   ): JsonReturningQueryBuilder<OutputType, Params, Role, ToolsType>;
 
-  build(data: Params): Query<string, Role, ToolsType['name']>;
+  build(data: Params): Query<string, Role, ToolsType>;
 }
 
 export interface JsonReturningQueryBuilder<
@@ -64,5 +64,5 @@ export interface JsonReturningQueryBuilder<
     schemaName?: string,
   ): JsonReturningQueryBuilder<NewOutputType, Params, Role, ToolsType>;
 
-  build(data: Params): Query<OutputType, Role, ToolsType['name']>;
+  build(data: Params): Query<OutputType, Role, ToolsType>;
 }

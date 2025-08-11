@@ -1,6 +1,5 @@
 import {
   ListBuilderFunction,
-  Memory,
   Prompt,
   PromptContentBuilder,
   PromptContentWoMemoryBuilder,
@@ -8,8 +7,6 @@ import {
   SectionBuilderFunction,
   SectionWoSubsectionBuilderFunction,
   TableBuilderFunction,
-  Tool,
-  ToolRegistry,
 } from "../../developer-api/index.js";
 import {
   ContentBuilderImpl,
@@ -31,7 +28,6 @@ type PromptContentBuilderImplDatum<Params extends Record<string, any>> =
 export class PromptContentBuilderImpl<
   Params extends Record<string, any>,
   Role extends string,
-  ToolsType extends Tool<any, any>,
 >
   implements PromptContentBuilder<Params> {
   private builderData: PromptContentBuilderImplDatum<Params>[];
