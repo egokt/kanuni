@@ -167,7 +167,7 @@ describe("QueryBuilderImpl", () => {
         test_tool: {
           name: "test_tool",
           description: "A test tool",
-          parameters: z.object({ param: z.string() }),
+          parameters: { param: z.string() },
         },
       };
 
@@ -183,12 +183,12 @@ describe("QueryBuilderImpl", () => {
         tool1: {
           name: "tool1",
           description: "First tool",
-          parameters: z.object({ a: z.string() }),
+          parameters: { a: z.string() },
         },
         tool2: {
           name: "tool2", 
           description: "Second tool",
-          parameters: z.object({ b: z.number() }),
+          parameters: { b: z.number() },
         },
       };
 
@@ -204,7 +204,7 @@ describe("QueryBuilderImpl", () => {
         test_tool: {
           name: "test_tool",
           description: "A test tool",
-          parameters: z.object({ param: z.string() }),
+          parameters: { param: z.string() },
         },
       };
 
@@ -417,7 +417,7 @@ describe("QueryBuilderImpl", () => {
         test_tool: {
           name: "test_tool",
           description: "A test tool",
-          parameters: z.object({ param: z.string() }),
+          parameters: { param: z.string() },
         },
       };
 

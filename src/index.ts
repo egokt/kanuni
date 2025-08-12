@@ -10,4 +10,5 @@ export type {
   MemoryBuilder,
   Query,
   RoleDefault,
+  Tool,
 } from "./developer-api/index.js";

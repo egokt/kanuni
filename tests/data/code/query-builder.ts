@@ -5,7 +5,7 @@ import { Tool } from "../../../src/developer-api/types.js";
 // *****************************************************************************
 // Should be ok without memory and output
 // prettier-ignore
-const q1 = Kanuni.newQuery<{ title: string }>()
+const q1 = Kanuni.newQuery<{ title: string }, string>()
   .prompt(p => p.paragraph`Hello`)
   .build({ title: '123' });
 
@@ -15,7 +15,7 @@ new TextualMarkdownFormatter().format(q1);
 // *****************************************************************************
 // Should be ok with memory and output
 // prettier-ignore
-const query = Kanuni.newQuery<{ title: string }>()
+const query = Kanuni.newQuery<{ title: string }, { reasoning: string; type: string; result: string; }>()
   .prompt(p => p
     .paragraph`This is a simple paragraph with title: ${'title'}`
     // this is a placeholder for the section that will include the chat history
@@ -54,13 +54,13 @@ const query = Kanuni.newQuery<{ title: string }>()
   }))
   .build({ title: 'My Title' })
 
-new TextualMarkdownFormatter().format(query);
+new TextualMarkdownFormatter<{ reasoning: string; type: string; result: string;  }>().format(query);
 
 
 // *****************************************************************************
 // Should align tools and tools type param
 // prettier-ignore
-const q3 = Kanuni.newQuery<{}, RoleDefault, Tool<'tool1', { a: string; }> | Tool<'tool2', {}>>()
+const q3 = Kanuni.newQuery<{}, string, RoleDefault, Tool<'tool1', { a: string; }> | Tool<'tool2', {}>>()
   .prompt(p => p
     .paragraph`Hello`
   )
@@ -68,9 +68,9 @@ const q3 = Kanuni.newQuery<{}, RoleDefault, Tool<'tool1', { a: string; }> | Tool
     tool1: {
       name: 'tool1',
       description: 'something',
-      parameters: z.strictObject({ a: z.string() })
+      parameters: { a: z.string() },
     }
   })
   .build({});
 
-new TextualMarkdownFormatter<{}, RoleDefault, Tool<'tool1', { a: string; }> | Tool<'tool2', {}>>().format(q3);
+new TextualMarkdownFormatter<string, RoleDefault, Tool<'tool1', { a: string; }> | Tool<'tool2', {}>>().format(q3);

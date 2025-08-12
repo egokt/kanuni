@@ -25,7 +25,7 @@ type TestMemory = Memory<RoleDefault, "test_tool">;
 
 describe("TextualMarkdownFormatter.format", () => {
   it("formats a prompt with a single paragraph", () => {
-    const formatter = new TextualMarkdownFormatter<Record<string, any>, RoleDefault, TestTool>();
+    const formatter = new TextualMarkdownFormatter<string, RoleDefault, TestTool>();
     const query: TestQuery = {
       prompt: {
         type: "prompt",
@@ -37,7 +37,7 @@ describe("TextualMarkdownFormatter.format", () => {
   });
 
   it("formats a prompt with multiple paragraphs", () => {
-    const formatter = new TextualMarkdownFormatter<Record<string, any>, RoleDefault, TestTool>();
+    const formatter = new TextualMarkdownFormatter<string, RoleDefault, TestTool>();
     const query: TestQuery = {
       prompt: {
         type: "prompt",
@@ -52,7 +52,7 @@ describe("TextualMarkdownFormatter.format", () => {
   });
 
   it("formats a prompt with a list including nested lists", () => {
-    const formatter = new TextualMarkdownFormatter<Record<string, any>, RoleDefault, TestTool>();
+    const formatter = new TextualMarkdownFormatter<string, RoleDefault, TestTool>();
     const query: TestQuery = {
       prompt: {
         type: "prompt",
@@ -80,7 +80,7 @@ describe("TextualMarkdownFormatter.format", () => {
   });
 
   it("formats a prompt with a section with heading and contents", () => {
-    const formatter = new TextualMarkdownFormatter<Record<string, any>, RoleDefault, TestTool>();
+    const formatter = new TextualMarkdownFormatter<string, RoleDefault, TestTool>();
     const query: TestQuery = {
       prompt: {
         type: "prompt",
@@ -99,7 +99,7 @@ describe("TextualMarkdownFormatter.format", () => {
   });
 
   it("formats a prompt with a table with headers and rows", () => {
-    const formatter = new TextualMarkdownFormatter<Record<string, any>, RoleDefault, TestTool>();
+    const formatter = new TextualMarkdownFormatter<string, RoleDefault, TestTool>();
     const query: TestQuery = {
       prompt: {
         type: "prompt",
@@ -143,7 +143,7 @@ describe("TextualMarkdownFormatter.format", () => {
   });
 
   it("formats a section containing memory", () => {
-    const formatter = new TextualMarkdownFormatter<Record<string, any>, RoleDefault, TestTool>();
+    const formatter = new TextualMarkdownFormatter<string, RoleDefault, TestTool>();
     const memory: TestMemory = {
       type: "memory",
       contents: [
@@ -173,7 +173,7 @@ describe("TextualMarkdownFormatter.format", () => {
   });
 
   it("handles custom configuration (indentation, list prefix, memory intro text)", () => {
-    const formatter = new TextualMarkdownFormatter<Record<string, any>, RoleDefault, TestTool>({
+    const formatter = new TextualMarkdownFormatter<string, RoleDefault, TestTool>({
       indentationString: "--",
       unnumberedListItemPrefix: "* ",
       memoryIntroductionText: "Custom Memory: ",
@@ -207,7 +207,7 @@ describe("TextualMarkdownFormatter.format", () => {
   });
 
   it("throws on unknown content type", () => {
-    const formatter = new TextualMarkdownFormatter<Record<string, any>, RoleDefault, TestTool>();
+    const formatter = new TextualMarkdownFormatter<string, RoleDefault, TestTool>();
     const query: TestQuery = {
       prompt: {
         type: "prompt",
@@ -221,7 +221,7 @@ describe("TextualMarkdownFormatter.format", () => {
   });
 
   it("handles empty prompt contents", () => {
-    const formatter = new TextualMarkdownFormatter<Record<string, any>, RoleDefault, TestTool>();
+    const formatter = new TextualMarkdownFormatter<string, RoleDefault, TestTool>();
     const query: TestQuery = {
       prompt: {
         type: "prompt",
@@ -233,7 +233,7 @@ describe("TextualMarkdownFormatter.format", () => {
   });
 
   it("handles deeply nested sections and lists", () => {
-    const formatter = new TextualMarkdownFormatter<Record<string, any>, RoleDefault, TestTool>();
+    const formatter = new TextualMarkdownFormatter<string, RoleDefault, TestTool>();
     const query: TestQuery = {
       prompt: {
         type: "prompt",
@@ -268,7 +268,7 @@ describe("TextualMarkdownFormatter.format", () => {
 
   describe("memory exclusion", () => {
     it("excludes memory when excludes.memory is set to true", () => {
-      const formatter = new TextualMarkdownFormatter<Record<string, any>, RoleDefault, TestTool>({
+      const formatter = new TextualMarkdownFormatter<string, RoleDefault, TestTool>({
         excludes: { memory: true },
       });
       const memory: TestMemory = {
@@ -304,7 +304,7 @@ describe("TextualMarkdownFormatter.format", () => {
     });
 
     it("excludes entire section when it only contains memory", () => {
-      const formatter = new TextualMarkdownFormatter<Record<string, any>, RoleDefault, TestTool>({
+      const formatter = new TextualMarkdownFormatter<string, RoleDefault, TestTool>({
         excludes: { memory: true },
       });
       const memory: TestMemory = {
@@ -333,7 +333,7 @@ describe("TextualMarkdownFormatter.format", () => {
     });
 
     it("excludes entire section when it contains memory (including its content)", () => {
-      const formatter = new TextualMarkdownFormatter<Record<string, any>, RoleDefault, TestTool>({
+      const formatter = new TextualMarkdownFormatter<string, RoleDefault, TestTool>({
         excludes: { memory: true },
       });
       const memory: TestMemory = {
@@ -369,7 +369,7 @@ describe("TextualMarkdownFormatter.format", () => {
     });
 
     it("includes memory when excludes.memory is false (default behavior)", () => {
-      const formatter = new TextualMarkdownFormatter<Record<string, any>, RoleDefault, TestTool>({
+      const formatter = new TextualMarkdownFormatter<string, RoleDefault, TestTool>({
         excludes: { memory: false },
       });
       const memory: TestMemory = {
@@ -403,7 +403,7 @@ describe("TextualMarkdownFormatter.format", () => {
     });
 
     it("includes sections without memory when excludes.memory is true", () => {
-      const formatter = new TextualMarkdownFormatter<Record<string, any>, RoleDefault, TestTool>({
+      const formatter = new TextualMarkdownFormatter<string, RoleDefault, TestTool>({
         excludes: { memory: true },
       });
       const query: TestQuery = {
@@ -429,7 +429,7 @@ describe("TextualMarkdownFormatter.format", () => {
     });
 
     it("handles mixed prompt contents with memory exclusion", () => {
-      const formatter = new TextualMarkdownFormatter<Record<string, any>, RoleDefault, TestTool>({
+      const formatter = new TextualMarkdownFormatter<string, RoleDefault, TestTool>({
         excludes: { memory: true },
       });
       const memory: TestMemory = {
@@ -482,12 +482,12 @@ describe("TextualMarkdownFormatter.format", () => {
 
   describe("tool sections", () => {
     it("formats tools section with tool definitions", () => {
-      const formatter = new TextualMarkdownFormatter<Record<string, any>, RoleDefault, TestTool>();
+      const formatter = new TextualMarkdownFormatter<string, RoleDefault, TestTool>();
       const tools: ToolRegistry<TestTool> = {
         test_tool: {
           name: "test_tool",
           description: "A test tool for testing",
-          parameters: z.object({ param: z.string() }),
+          parameters: { param: z.string() },
         },
       };
       const query: TestQuery = {
@@ -516,14 +516,14 @@ describe("TextualMarkdownFormatter.format", () => {
     });
 
     it("excludes tools when excludes.tools is set to true", () => {
-      const formatter = new TextualMarkdownFormatter<Record<string, any>, RoleDefault, TestTool>({
+      const formatter = new TextualMarkdownFormatter<string, RoleDefault, TestTool>({
         excludes: { tools: true },
       });
       const tools: ToolRegistry<TestTool> = {
         test_tool: {
           name: "test_tool",
           description: "A test tool for testing",
-          parameters: z.object({ param: z.string() }),
+          parameters: { param: z.string() },
         },
       };
       const query: TestQuery = {
@@ -551,7 +551,7 @@ describe("TextualMarkdownFormatter.format", () => {
     });
 
     it("handles empty tools section gracefully", () => {
-      const formatter = new TextualMarkdownFormatter<Record<string, any>, RoleDefault, TestTool>();
+      const formatter = new TextualMarkdownFormatter<string, RoleDefault, TestTool>();
       const query: TestQuery = {
         prompt: {
           type: "prompt",
@@ -571,14 +571,14 @@ describe("TextualMarkdownFormatter.format", () => {
     });
 
     it("customizes tools introduction text", () => {
-      const formatter = new TextualMarkdownFormatter<Record<string, any>, RoleDefault, TestTool>({
+      const formatter = new TextualMarkdownFormatter<string, RoleDefault, TestTool>({
         toolsIntroductionText: "Custom Tools:",
       });
       const tools: ToolRegistry<TestTool> = {
         test_tool: {
           name: "test_tool",
           description: "A test tool",
-          parameters: z.object({ param: z.string() }),
+          parameters: { param: z.string() },
         },
       };
       const query: TestQuery = {
@@ -636,7 +636,7 @@ describe("TextualMarkdownFormatter.format", () => {
     });
 
     it("formats text output specs section", () => {
-      const formatter = new TextualMarkdownFormatter<Record<string, any>, RoleDefault, TestTool>({
+      const formatter = new TextualMarkdownFormatter<string, RoleDefault, TestTool>({
         outputTextIntroductionText: "Respond with plain text",
       });
       const query: TestQuery = {
@@ -662,7 +662,7 @@ describe("TextualMarkdownFormatter.format", () => {
     });
 
     it("excludes output specs when excludes.outputSpecs is set to true", () => {
-      const formatter = new TextualMarkdownFormatter<Record<string, any>, RoleDefault, TestTool>({
+      const formatter = new TextualMarkdownFormatter<string, RoleDefault, TestTool>({
         excludes: { outputSpecs: true },
       });
       const query: TestQuery = {
@@ -688,7 +688,7 @@ describe("TextualMarkdownFormatter.format", () => {
 
   describe("memory formatting", () => {
     it("formats different memory item types", () => {
-      const formatter = new TextualMarkdownFormatter<Record<string, any>, RoleDefault, TestTool>();
+      const formatter = new TextualMarkdownFormatter<string, RoleDefault, TestTool>();
       const memory: TestMemory = {
         type: "memory",
         contents: [
@@ -734,7 +734,7 @@ describe("TextualMarkdownFormatter.format", () => {
     });
 
     it("handles roles with spaces and special characters", () => {
-      const formatter = new TextualMarkdownFormatter<Record<string, any>, "user" | "ai assistant", never>();
+      const formatter = new TextualMarkdownFormatter<string, "user" | "ai assistant", never>();
       const memory: Memory<"user" | "ai assistant", never> = {
         type: "memory",
         contents: [
@@ -761,7 +761,7 @@ describe("TextualMarkdownFormatter.format", () => {
     });
 
     it("handles empty memory introduction text", () => {
-      const formatter = new TextualMarkdownFormatter<Record<string, any>, RoleDefault, TestTool>({
+      const formatter = new TextualMarkdownFormatter<string, RoleDefault, TestTool>({
         memoryIntroductionText: "",
       });
       const memory: TestMemory = {
@@ -793,7 +793,7 @@ describe("TextualMarkdownFormatter.format", () => {
 
   describe("table formatting", () => {
     it("formats table without column headers", () => {
-      const formatter = new TextualMarkdownFormatter<Record<string, any>, RoleDefault, TestTool>();
+      const formatter = new TextualMarkdownFormatter<string, RoleDefault, TestTool>();
       const query: TestQuery = {
         prompt: {
           type: "prompt",
@@ -823,7 +823,7 @@ describe("TextualMarkdownFormatter.format", () => {
     });
 
     it("formats table with row headers", () => {
-      const formatter = new TextualMarkdownFormatter<Record<string, any>, RoleDefault, TestTool>();
+      const formatter = new TextualMarkdownFormatter<string, RoleDefault, TestTool>();
       const query: TestQuery = {
         prompt: {
           type: "prompt",
@@ -856,7 +856,7 @@ describe("TextualMarkdownFormatter.format", () => {
     });
 
     it("formats nested content in table cells", () => {
-      const formatter = new TextualMarkdownFormatter<Record<string, any>, RoleDefault, TestTool>();
+      const formatter = new TextualMarkdownFormatter<string, RoleDefault, TestTool>();
       const query: TestQuery = {
         prompt: {
           type: "prompt",
@@ -895,7 +895,7 @@ describe("TextualMarkdownFormatter.format", () => {
 
   describe("list formatting", () => {
     it("handles deeply nested lists with custom indentation", () => {
-      const formatter = new TextualMarkdownFormatter<Record<string, any>, RoleDefault, TestTool>({
+      const formatter = new TextualMarkdownFormatter<string, RoleDefault, TestTool>({
         indentationString: "    ", // 4 spaces
         unnumberedListItemPrefix: "• ",
       });
@@ -936,7 +936,7 @@ describe("TextualMarkdownFormatter.format", () => {
     });
 
     it("throws error for unknown list item content type", () => {
-      const formatter = new TextualMarkdownFormatter<Record<string, any>, RoleDefault, TestTool>();
+      const formatter = new TextualMarkdownFormatter<string, RoleDefault, TestTool>();
       const query: TestQuery = {
         prompt: {
           type: "prompt",
@@ -957,7 +957,7 @@ describe("TextualMarkdownFormatter.format", () => {
 
   describe("section formatting", () => {
     it("formats section without heading", () => {
-      const formatter = new TextualMarkdownFormatter<Record<string, any>, RoleDefault, TestTool>();
+      const formatter = new TextualMarkdownFormatter<string, RoleDefault, TestTool>();
       const query: TestQuery = {
         prompt: {
           type: "prompt",
@@ -978,7 +978,7 @@ describe("TextualMarkdownFormatter.format", () => {
     });
 
     it("handles empty section contents", () => {
-      const formatter = new TextualMarkdownFormatter<Record<string, any>, RoleDefault, TestTool>();
+      const formatter = new TextualMarkdownFormatter<string, RoleDefault, TestTool>();
       const query: TestQuery = {
         prompt: {
           type: "prompt",
@@ -997,7 +997,7 @@ describe("TextualMarkdownFormatter.format", () => {
     });
 
     it("throws error for subsections in memory sections", () => {
-      const formatter = new TextualMarkdownFormatter<Record<string, any>, RoleDefault, TestTool>();
+      const formatter = new TextualMarkdownFormatter<string, RoleDefault, TestTool>();
       const memory: TestMemory = {
         type: "memory",
         contents: [
@@ -1031,7 +1031,7 @@ describe("TextualMarkdownFormatter.format", () => {
 
   describe("error handling", () => {
     it("throws error for unknown section content type", () => {
-      const formatter = new TextualMarkdownFormatter<Record<string, any>, RoleDefault, TestTool>();
+      const formatter = new TextualMarkdownFormatter<string, RoleDefault, TestTool>();
       const query: TestQuery = {
         prompt: {
           type: "prompt",
@@ -1051,7 +1051,7 @@ describe("TextualMarkdownFormatter.format", () => {
     });
 
     it("throws error for unknown table cell content type", () => {
-      const formatter = new TextualMarkdownFormatter<Record<string, any>, RoleDefault, TestTool>();
+      const formatter = new TextualMarkdownFormatter<string, RoleDefault, TestTool>();
       const query: TestQuery = {
         prompt: {
           type: "prompt",
@@ -1099,7 +1099,7 @@ describe("TextualMarkdownFormatter.format", () => {
 
   describe("filtering empty content", () => {
     it("filters out empty strings from formatted content", () => {
-      const formatter = new TextualMarkdownFormatter<Record<string, any>, RoleDefault, TestTool>();
+      const formatter = new TextualMarkdownFormatter<string, RoleDefault, TestTool>();
       const query: TestQuery = {
         prompt: {
           type: "prompt",

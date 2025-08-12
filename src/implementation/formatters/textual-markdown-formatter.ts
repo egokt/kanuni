@@ -2,6 +2,7 @@ import { zodToJsonSchema } from "zod-to-json-schema";
 import {
   Formatter,
   List,
+  Memory,
   Paragraph,
   Query,
   RoleDefault,
@@ -11,7 +12,9 @@ import {
   TableHeaderCell,
   TableRow,
   Tool,
+  ToolRegistry,
 } from "../../developer-api/index.js";
+import { ZodType } from "zod";
 
 type TextualMarkdownFormatterConfig = {
   indentationString?: string;
@@ -37,7 +40,7 @@ const DEFAULT_OUTPUT_JSON_INTRODUCTION_TEXT = "JSON schema for response: ";
 const DEFAULT_OUTPUT_TEXT_INTRODUCTION_TEXT = "";
 
 export class TextualMarkdownFormatter<
-  OutputSchema extends Record<string, any> = Record<string, any>,
+  OutputSchema extends Record<string, any> | string = string,
   Role extends string = RoleDefault,
   ToolsType extends Tool<any, any> = never,
 > implements Formatter<TextualMarkdownFormatterParams, string, OutputSchema, Role, ToolsType>
@@ -69,7 +72,7 @@ export class TextualMarkdownFormatter<
   }
 
   format(
-    query: Query<any, Role, ToolsType>,
+    query: Query<OutputSchema, Role, ToolsType>,
     _params?: TextualMarkdownFormatterParams
   ): string {
     const str = query.prompt.contents
@@ -130,7 +133,7 @@ export class TextualMarkdownFormatter<
 
   private formatMemorySection(
     section: Section,
-    memory: Query<any, Role, ToolsType>['memory'],
+    memory?: Memory<Role, ToolsType["name"]>,
   ): string {
     if (!section.isMemorySection) {
       throw new Error('Something is wrong: trying to format a section that is' +
@@ -157,7 +160,7 @@ export class TextualMarkdownFormatter<
 
   private formatToolsSection(
     section: Section,
-    tools: Query<any, Role, ToolsType>['tools'],
+    tools?: ToolRegistry<ToolsType>,
   ): string {
     if (!section.isToolsSection) {
       throw new Error('Something is wrong: trying to format a section that is' +
@@ -184,7 +187,7 @@ export class TextualMarkdownFormatter<
 
   private formatOutputSpecsSection(
     section: Section,
-    outputSpecs: Query<any, Role, ToolsType>['output'],
+    outputSpecs: Query<OutputSchema, Role, ToolsType>['output'],
   ): string {
     if (!section.isOutputSpecsSection) {
       throw new Error('Something is wrong: trying to format a section that is' +
@@ -219,11 +222,16 @@ export class TextualMarkdownFormatter<
   }
 
 
-  private formatTools(tools: NonNullable<Query<any, Role, ToolsType>['tools']>): string {
+  private formatTools(tools: ToolRegistry<ToolsType>): string {
     let toolStrArray = Object.values(tools).map(tool => JSON.stringify({
       name: tool.name,
       description: tool.description,
-      parameters: zodToJsonSchema(tool.parameters),
+      parameters: Object.entries(tool.parameters)
+        .reduce((acc, [name, schema]) => ({
+          ...acc,
+          // TODO: find a way to eliminate this cast
+          name: zodToJsonSchema(schema as ZodType, { name }),
+        }), {}),
     }, null, 2));
     let str =
       this.toolsIntroductionText.length === 0
@@ -348,7 +356,7 @@ export class TextualMarkdownFormatter<
     return str;
   }
 
-  private formatMemory(memory: NonNullable<Query<any, Role, ToolsType>['memory']>): string {
+  private formatMemory(memory: Memory<Role, ToolsType["name"]>): string {
     let str =
       this.memoryIntroductionText.length === 0
         ? ""

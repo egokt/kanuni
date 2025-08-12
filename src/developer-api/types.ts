@@ -48,10 +48,10 @@ export type OutputSchemaDescription = {
   exampleValues?: string[];
 };
 
-export type Tool<Name extends string, Params extends Record<string, any>> = {
+export type Tool<Name extends string, Params extends {[key: string]: any}> = {
   name: Name;
   description: string;
-  parameters: ZodType<Params>;
+  parameters: {[K in keyof Params]: ZodType<Params[K]>},
 };
 
 export type ToolRegistry<ToolsType extends Tool<any, any>> =
