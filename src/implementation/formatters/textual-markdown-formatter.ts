@@ -208,10 +208,10 @@ export class TextualMarkdownFormatter<
       case 'output-json':
         // Now format and add the tools
         str += `\n\n${this.outputJsonIntroductionText}\n\n`;
-        str += zodToJsonSchema(
+        str += JSON.stringify(zodToJsonSchema(
           outputSpecs.schema,
           { name: outputSpecs.schemaName }
-        );
+        ), null, 2);
         return str;
       default:
         throw new Error(`Unknown output spec type: ${(outputSpecs as { type: string; }).type}`)

@@ -137,7 +137,19 @@ export class PromptContentBuilderImpl<
 
   build(data: Params): Prompt {
     const contents = this.builderData
-      .map((datum) => datum.func(data))
+      .map((datum) => {
+        const retval = datum.func(data);
+        if (datum.type === 'section' && retval?.type == 'section') {
+          if (datum.isMemorySection) {
+            retval.isMemorySection = true;
+          } else if (datum.isToolsSection) {
+            retval.isToolsSection = true;
+          } else if (datum.isOutputSpecsSection) {
+            retval.isOutputSpecsSection = true;
+          }
+        }
+        return retval;
+      })
       .filter((content) => content !== undefined && content !== null);
     return {
       type: "prompt",

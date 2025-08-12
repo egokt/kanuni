@@ -34,6 +34,16 @@ export interface MemoryBuilder<
     result: string | null,
   ): MemoryBuilder<Params, Role, ToolName>;
 
+  /**
+   * Appends existing memory items to the builder.
+   * 
+   * **Important**: The appended items will share object references with the originals
+   * for performance reasons. Do not modify the original memory items after appending,
+   * as changes will be reflected in the built memory.
+   * 
+   * @param memoryItems Array of memory items to append
+   * @returns The builder instance for method chaining
+   */
   append(
     memoryItems: MemoryItem<Role, ToolName>[],
   ): MemoryBuilder<Params, Role, ToolName>;
