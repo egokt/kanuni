@@ -71,6 +71,28 @@ export class TextualMarkdownFormatter<
     this.excludes = excludes;
   }
 
+  static format<
+    OutputSchema extends Record<string, any> | string = string,
+    Role extends string = RoleDefault,
+    ToolsType extends Tool<any, any> = never,
+  >(
+    query: Query<OutputSchema, Role, ToolsType>,
+    params?: TextualMarkdownFormatterParams
+  ): string {
+    return new TextualMarkdownFormatter<OutputSchema, Role, ToolsType>()
+      .format(query, params);
+  }
+
+  /**
+   * Format the context as a textual prompt.
+   * 
+   * Prefer using the static format function as it aligns the types with
+   * query automatically.
+   * 
+   * @param query Query to be formatted
+   * @param _params Formatter parameters.
+   * @returns The context formatted as a textual prompt.
+   */
   format(
     query: Query<OutputSchema, Role, ToolsType>,
     _params?: TextualMarkdownFormatterParams
