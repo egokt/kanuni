@@ -43,8 +43,7 @@ export class TextualMarkdownFormatter<
   OutputSchema extends Record<string, any> | string = string,
   Role extends string = RoleDefault,
   ToolsType extends Tool<any, any> = never,
-> implements Formatter<TextualMarkdownFormatterParams, string, OutputSchema, Role, ToolsType>
-{
+> implements Formatter<TextualMarkdownFormatterParams, string, OutputSchema, Role, ToolsType> {
   private indentationString: string;
   private unnumberedListItemPrefix: string;
   private memoryIntroductionText: string;
@@ -243,9 +242,8 @@ export class TextualMarkdownFormatter<
     }
   }
 
-
   private formatTools(tools: ToolRegistry<ToolsType>): string {
-    let toolStrArray = Object.values(tools).map(tool => JSON.stringify({
+    let toolStrArray = Object.values<ToolsType>(tools).map(tool => JSON.stringify({
       name: tool.name,
       description: tool.description,
       parameters: Object.entries(tool.parameters)

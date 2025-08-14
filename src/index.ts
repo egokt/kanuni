@@ -6,9 +6,12 @@ export {
 
 export type {
   Formatter,
+  JsonOutput,
   Memory,
   MemoryBuilder,
   Query,
   RoleDefault,
   Tool,
+  ToolCall,
+  ToolRegistry,
 } from "./developer-api/index.js";

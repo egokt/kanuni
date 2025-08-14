@@ -54,13 +54,10 @@ export type Tool<Name extends string, Params extends {[key: string]: any}> = {
   parameters: {[K in keyof Params]: ZodType<Params[K]>},
 };
 
-export type ToolRegistry<ToolsType extends Tool<any, any>> =
-  ToolsType extends never
-    ? {}
-    : {
-      [K in ToolsType['name']]: Extract<
-        ToolsType,
-        { name: K }
-      >;
-    };
+export type ToolRegistry<ToolsType extends Tool<any, any>> = {
+  [K in ToolsType['name']]: Extract<
+    ToolsType,
+    { name: K }
+  >;
+};
 

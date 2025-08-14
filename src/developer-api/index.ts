@@ -4,6 +4,8 @@ export type {
   MemoryBuilderFunction,
   MemoryItem,
   RoleDefault,
+  ToolCall,
+  ToolCallResult,
 } from "./memory/index.js";
 export type {
   ContentBuilder,
