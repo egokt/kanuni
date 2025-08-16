@@ -10,6 +10,17 @@ export class Kanuni {
     return new MemoryBuilderImpl<Params, Role, ToolName>();
   }
 
+  static buildMemory<
+    Params extends Record<string, any>,
+    Role extends string,
+    ToolName extends string,
+  >(
+    builder: MemoryBuilder<Params, Role, ToolName>,
+    data: Params
+  ): Memory<Role, ToolName>  {
+    return (builder as MemoryBuilderImpl<Params, Role, ToolName>).build(data);
+  }
+
   /**
    * Extracts memory from a query for reuse in subsequent queries.
    * 

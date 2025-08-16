@@ -60,4 +60,3 @@ export type ToolRegistry<ToolsType extends Tool<any, any>> = {
     { name: K }
   >;
 };
-
