@@ -68,7 +68,12 @@ const q3 = Kanuni.newQuery<{},RoleDefault, Tool<'tool1', { a: string; }> | Tool<
       name: 'tool1',
       description: 'something',
       parameters: { a: z.string() },
-    }
+    },
+    tool2: {
+      name: 'tool2',
+      description: 'The fabuloausliestish second tool',
+      parameters: {},
+    },
   })
   .build({});
 
