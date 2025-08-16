@@ -17,21 +17,6 @@ export type Query<
   ToolsType extends Tool<any, any> = never,
 > = QBase<Role, ToolsType> & QOutput<OutputType>;
 
-// export type TextQuery<Role extends string = RoleDefault, ToolName extends string = string> = {
-//   prompt: Prompt;
-//   memory?: Memory<Role, ToolName>;
-//   output?: TextOutput;
-// };
-
-// export type JsonQuery<
-//   OutputType extends Record<string, any> = Record<string, any>,
-//   Role extends string = RoleDefault
-// > = {
-//   prompt: Prompt;
-//   memory?: Memory<Role>;
-//   output: JsonOutput<OutputType>;
-// };
-
 export type TextOutput = {
   type: "output-text";
 };
