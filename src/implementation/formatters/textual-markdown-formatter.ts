@@ -402,7 +402,7 @@ export class TextualMarkdownFormatter<
               toolCallId: item.toolCallId,
               result: item.result,
             };
-            return `<tool_coll_result>\n${JSON.stringify(toolCallResultData, null, 2)}\n</tool_call_result>`
+            return `<tool_call_result>\n${JSON.stringify(toolCallResultData, null, 2)}\n</tool_call_result>`
           default:
             return null;
         }

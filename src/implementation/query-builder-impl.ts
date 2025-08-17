@@ -229,7 +229,7 @@ export class JsonReturningQueryBuilderImpl<
         this.memoryData = (data) => newBuilder.build(data);
       }
     } else {
-      // TODO: find a better way to unsure the safety of this cast
+      // TODO: find a better way to ensure the safety of this cast
       const memoryBuilder = memoryBuilderFunctionOrMemoryBuilder as MemoryBuilderImpl<Params, Role, ToolsType['name']>;
       this.memoryData = (data) => memoryBuilder.build(data);
     }

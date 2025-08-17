@@ -455,11 +455,7 @@ describe("QueryBuilderImpl", () => {
       };
 
       const builder = new QueryBuilderImpl<{}, RoleDefault, never>();
-      
-      // This should work according to the interface but might fail due to the unsafe cast
-      // @ts-ignore - We're testing runtime behavior that might not match the type system
       builder.memory(mockMemoryBuilder);
-      
       const result = builder.build({});
       
       // If the implementation works correctly, this should pass

@@ -729,7 +729,7 @@ describe("TextualMarkdownFormatter.format", () => {
       expect(output).toContain("<tool_call>");
       expect(output).toContain('"toolName": "test_tool"');
       expect(output).toContain('"toolCallId": "call_123"');
-      expect(output).toContain("<tool_coll_result>");
+      expect(output).toContain("<tool_call_result>");
       expect(output).toContain('"result": "Tool result"');
     });
 
