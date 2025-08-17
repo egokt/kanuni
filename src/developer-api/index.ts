@@ -4,6 +4,8 @@ export type {
   MemoryBuilderFunction,
   MemoryItem,
   RoleDefault,
+  ToolCall,
+  ToolCallResult,
 } from "./memory/index.js";
 export type {
   ContentBuilder,
@@ -14,12 +16,16 @@ export type {
   ListBuilderFunction,
   Paragraph,
   Prompt,
+  PromptContentBuilder,
+  PromptContentBuilderFunction,
+  PromptContentWoMemoryBuilder,
+  PromptContentWoOutputSpecsBuilder,
+  PromptContentWoToolsBuilder,
   Section,
   SectionBuilder,
   SectionBuilderFunction,
   SectionContentBuilder,
-  SectionContentWoMemoryBuilder,
-  SectionBuilderWoMemoryFunction,
+  SectionWoSubsectionBuilderFunction,
   Table,
   TableBuilder,
   TableBuilderFunction,
@@ -43,5 +49,7 @@ export type {
   OutputSchemaDescription,
   Query,
   TextOutput,
+  Tool,
+  ToolRegistry,
 } from "./types.js";
 export type { Formatter } from "./formatter.js";

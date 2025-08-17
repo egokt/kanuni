@@ -6,7 +6,7 @@ import {
   TableRowBuilder,
   TableRowBuilderWoHeader,
 } from "../../developer-api/index.js";
-import { ContentBuilderImpl } from "./context-builder-impl.js";
+import { ContentBuilderImpl } from "./content-builder-impl.js";
 import { TableCellBuilderImpl } from "./table-cell-builder-impl.js";
 
 type TableRowBuilderImplCellDatum<Params extends Record<string, any>> = {

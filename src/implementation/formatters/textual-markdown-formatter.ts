@@ -1,9 +1,9 @@
+import { zodToJsonSchema } from "zod-to-json-schema";
 import {
   Formatter,
   List,
   Memory,
   Paragraph,
-  Prompt,
   Query,
   RoleDefault,
   Section,
@@ -11,19 +11,22 @@ import {
   TableCell,
   TableHeaderCell,
   TableRow,
+  Tool,
+  ToolRegistry,
 } from "../../developer-api/index.js";
+import { ZodType } from "zod";
 
 type TextualMarkdownFormatterConfig = {
   indentationString?: string;
   unnumberedListItemPrefix?: string;
   memoryIntroductionText?: string;
+  outputJsonIntroductionText?: string;
+  outputTextIntroductionText?: string;
+  toolsIntroductionText?: string;
   excludes?: {
     memory?: boolean; // if set to true, memory will not be included in the formatted output
-
-    // TODO: use the following line when output schema description is implemented
-    // outputSchema?: boolean; // if set to true, output schema description will not be included
-
-    // TODO: add tools here later
+    outputSpecs?: boolean; // if set to true, output schema description will not be included
+    tools?: boolean; // if set to true, tools will not be included in the formatted output
   }
 };
 
@@ -32,37 +35,68 @@ type TextualMarkdownFormatterParams = {};
 const DEFAULT_INDENTATION_STRING = "  ";
 const DEFAULT_UNNUMBERED_LIST_ITEM_PREFIX = "- ";
 const DEFAULT_MEMORY_INTRODUCTION_TEXT = "History: ";
+const DEFAULT_TOOLS_INTRODUCTION_TEXT = "Tools available: ";
+const DEFAULT_OUTPUT_JSON_INTRODUCTION_TEXT = "JSON schema for response: ";
+const DEFAULT_OUTPUT_TEXT_INTRODUCTION_TEXT = "";
 
 export class TextualMarkdownFormatter<
-  OutputSchema extends Record<string, any> = Record<string, any>,
-  Role extends string = RoleDefault
-> implements Formatter<TextualMarkdownFormatterParams, string, OutputSchema, Role>
-{
+  OutputSchema extends Record<string, any> | string = string,
+  Role extends string = RoleDefault,
+  ToolsType extends Tool<any, any> = never,
+> implements Formatter<TextualMarkdownFormatterParams, string, OutputSchema, Role, ToolsType> {
   private indentationString: string;
   private unnumberedListItemPrefix: string;
   private memoryIntroductionText: string;
+  private outputJsonIntroductionText: string;
+  private outputTextIntroductionText: string;
+  private toolsIntroductionText: string;
   private excludes: NonNullable<TextualMarkdownFormatterConfig["excludes"]>;
 
   constructor({
     indentationString = DEFAULT_INDENTATION_STRING,
     unnumberedListItemPrefix = DEFAULT_UNNUMBERED_LIST_ITEM_PREFIX,
     memoryIntroductionText = DEFAULT_MEMORY_INTRODUCTION_TEXT,
+    outputJsonIntroductionText = DEFAULT_OUTPUT_JSON_INTRODUCTION_TEXT,
+    outputTextIntroductionText = DEFAULT_OUTPUT_TEXT_INTRODUCTION_TEXT,
+    toolsIntroductionText = DEFAULT_TOOLS_INTRODUCTION_TEXT,
     excludes = {},
   }: TextualMarkdownFormatterConfig = {}) {
     this.indentationString = indentationString;
     this.unnumberedListItemPrefix = unnumberedListItemPrefix;
     this.memoryIntroductionText = memoryIntroductionText;
+    this.outputJsonIntroductionText = outputJsonIntroductionText;
+    this.outputTextIntroductionText = outputTextIntroductionText;
+    this.toolsIntroductionText = toolsIntroductionText;
     this.excludes = excludes;
   }
 
-  // TODO: Future work: this currently does not support output schema description for json text output.
-  format(query: Query<any, Role>, _params?: TextualMarkdownFormatterParams): string {
-    const prompt = this.formatPrompt(query.prompt);
-    return prompt;
+  static format<
+    OutputSchema extends Record<string, any> | string = string,
+    Role extends string = RoleDefault,
+    ToolsType extends Tool<any, any> = never,
+  >(
+    query: Query<OutputSchema, Role, ToolsType>,
+    params?: TextualMarkdownFormatterParams
+  ): string {
+    return new TextualMarkdownFormatter<OutputSchema, Role, ToolsType>()
+      .format(query, params);
   }
 
-  private formatPrompt(prompt: Prompt): string {
-    const str = prompt.contents
+  /**
+   * Format the context as a textual prompt.
+   * 
+   * Prefer using the static format function as it aligns the types with
+   * query automatically.
+   * 
+   * @param query Query to be formatted
+   * @param _params Formatter parameters.
+   * @returns The context formatted as a textual prompt.
+   */
+  format(
+    query: Query<OutputSchema, Role, ToolsType>,
+    _params?: TextualMarkdownFormatterParams
+  ): string {
+    const str = query.prompt.contents
       .map((content) => {
         switch (content.type) {
           case "paragraph":
@@ -70,7 +104,15 @@ export class TextualMarkdownFormatter<
           case "list":
             return this.formatList(content);
           case "section":
-            return this.formatSection(content);
+            if (content.isMemorySection) {
+              return this.formatMemorySection(content, query.memory);
+            } else if (content.isToolsSection) {
+              return this.formatToolsSection(content, query.tools);
+            } else if (content.isOutputSpecsSection) {
+              return this.formatOutputSpecsSection(content, query.output);
+            } else {
+              return this.formatSection(content);
+            }
           case "table":
             return this.formatTable(content);
           default:
@@ -79,6 +121,7 @@ export class TextualMarkdownFormatter<
             );
         }
       })
+      .filter(content => content.trim() !== '') // filter out empty strings
       .join("\n\n");
 
     return str;
@@ -109,13 +152,120 @@ export class TextualMarkdownFormatter<
     return str;
   }
 
-  private formatSection(section: Section, level = 0): string {
-    if (this.excludes.memory && section.memory) {
+  private formatMemorySection(
+    section: Section,
+    memory?: Memory<Role, ToolsType["name"]>,
+  ): string {
+    if (!section.isMemorySection) {
+      throw new Error('Something is wrong: trying to format a section that is' +
+        ' not marked as a memory section as if it is a memory section.');
+    }
+
+    if (this.excludes.memory) {
       return '';
     }
 
+    if (memory === undefined) {
+      // TODO: we might add a config param for throwing an error instead of
+      // silently skipping rendering the memory section
+      return '';
+    }
+
+    let str = this.formatMemoryOrToolsSectionContent(section);
+
+    // Now format and add the memory
+    str += "\n\n";
+    str += this.formatMemory(memory);
+    return str;
+  }
+
+  private formatToolsSection(
+    section: Section,
+    tools?: ToolRegistry<ToolsType>,
+  ): string {
+    if (!section.isToolsSection) {
+      throw new Error('Something is wrong: trying to format a section that is' +
+        ' not marked as a tools section as if it is a tools section.');
+    }
+
+    if (this.excludes.tools) {
+      return '';
+    }
+
+    if (tools === undefined || Object.keys(tools).length === 0) {
+      // TODO: we might add a config param for throwing an error instead of
+      // silently skipping rendering the tools section
+      return '';
+    }
+
+    let str = this.formatMemoryOrToolsSectionContent(section);
+
+    // Now format and add the tools
+    str += "\n\n";
+    str += this.formatTools(tools);
+    return str;
+  }
+
+  private formatOutputSpecsSection(
+    section: Section,
+    outputSpecs: Query<OutputSchema, Role, ToolsType>['output'],
+  ): string {
+    if (!section.isOutputSpecsSection) {
+      throw new Error('Something is wrong: trying to format a section that is' +
+        ' not marked as an output specs section as if it is an output specs ' +
+        'section.');
+    }
+
+    if (this.excludes.outputSpecs) {
+      return '';
+    }
+
+    let str = this.formatMemoryOrToolsSectionContent(section);
+
+    switch (outputSpecs.type) {
+      case 'output-text':
+        if (this.outputTextIntroductionText.length > 0) {
+          return str + `\n\n${this.outputTextIntroductionText}`;
+        } else {
+          return str;
+        }
+      case 'output-json':
+        // Now format and add the tools
+        str += `\n\n${this.outputJsonIntroductionText}\n\n`;
+        str += JSON.stringify(zodToJsonSchema(
+          outputSpecs.schema,
+          { name: outputSpecs.schemaName }
+        ), null, 2);
+        return str;
+      default:
+        throw new Error(`Unknown output spec type: ${(outputSpecs as { type: string; }).type}`)
+    }
+  }
+
+  private formatTools(tools: ToolRegistry<ToolsType>): string {
+    let toolStrArray = Object.values<ToolsType>(tools).map(tool => JSON.stringify({
+      name: tool.name,
+      description: tool.description,
+      parameters: Object.entries(tool.parameters)
+        .reduce((acc, [name, schema]) => ({
+          ...acc,
+          // TODO: find a way to eliminate this cast
+          name: zodToJsonSchema(schema as ZodType, { name }),
+        }), {}),
+    }, null, 2));
+    let str =
+      this.toolsIntroductionText.length === 0
+        ? ""
+        : this.toolsIntroductionText + "\n\n";
+    str += `[\n\n${toolStrArray.join("\n\n")}\n\n]`;
+    return str;
+  }
+
+  private formatMemoryOrToolsSectionContent(
+    section: Section,
+  ): string {
     let str = section.heading
-      ? `${"#".repeat(level + 1)} ${section.heading}`
+      ? `# ${section.heading}\n`
       : "";
 
     str += section.contents
@@ -124,7 +274,35 @@ export class TextualMarkdownFormatter<
           case "paragraph":
             return this.formatParagraph(content);
           case "list":
-            return this.formatList(content, level + 1);
+            return this.formatList(content);
+          case "section":
+            throw new Error('Subsections are not allowed in memory sections.');
+          case "table":
+            return this.formatTable(content);
+          default:
+            throw new Error(
+              `Unknown section content type: ${(content as { type: string }).type}`,
+            );
+        }
+      })
+      .filter(content => content.trim() !== '') // filter out empty strings
+      .join("\n\n");
+ 
+    return str;
+  }
+
+  private formatSection(section: Section, level = 0): string {
+    let str = section.heading
+      ? `${"#".repeat(level + 1)} ${section.heading}\n\n`
+      : "";
+
+    str += section.contents
+      .map((content) => {
+        switch (content.type) {
+          case "paragraph":
+            return this.formatParagraph(content);
+          case "list":
+            return this.formatList(content, 1);
           case "section":
             return this.formatSection(content, level + 1);
           case "table":
@@ -137,10 +315,6 @@ export class TextualMarkdownFormatter<
       })
       .filter(content => content.trim() !== '') // filter out empty strings
       .join("\n\n");
-
-    if (section.memory) {
-      str += `\n\n${this.formatMemory(section.memory)}`;
-    }
 
     return str;
   }
@@ -202,7 +376,7 @@ export class TextualMarkdownFormatter<
     return str;
   }
 
-  private formatMemory(memory: Memory): string {
+  private formatMemory(memory: Memory<Role, ToolsType["name"]>): string {
     let str =
       this.memoryIntroductionText.length === 0
         ? ""
@@ -210,11 +384,30 @@ export class TextualMarkdownFormatter<
 
     str += memory.contents
       .map((item) => {
-        const snakeCaseRole = item.role.replaceAll(" ", "_").toLowerCase();
-        const openingTag = `<${snakeCaseRole}>`;
-        const closingTag = `</${snakeCaseRole}>`;
-        return `${openingTag}\n${item.contents}\n${closingTag}`;
+        switch (item.type) {
+          case 'utterance':
+            const snakeCaseRole = item.role.replaceAll(" ", "_").toLowerCase();
+            const openingTag = `<${snakeCaseRole}>`;
+            const closingTag = `</${snakeCaseRole}>`;
+            return `${openingTag}\n${item.contents}\n${closingTag}`;
+          case 'tool-call':
+            const toolCallData = {
+              toolCallId: item.toolCallId,
+              toolName: item.toolName,
+              arguments: item.arguments,
+            };
+            return `<tool_call>\n${JSON.stringify(toolCallData, null, 2)}\n</tool_call>`;
+          case 'tool-call-result':
+            const toolCallResultData = {
+              toolCallId: item.toolCallId,
+              result: item.result,
+            };
+            return `<tool_call_result>\n${JSON.stringify(toolCallResultData, null, 2)}\n</tool_call_result>`
+          default:
+            return null;
+        }
       })
+      .filter(itemStringOrNull => itemStringOrNull !== null)
       .join("\n");
 
     return str;

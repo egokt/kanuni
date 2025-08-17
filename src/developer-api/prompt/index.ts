@@ -4,13 +4,19 @@ export type {
   ListBuilder,
   ListBuilderFunction,
 } from "./list-builder.js";
-export {
+export type {
   SectionBuilder,
   SectionContentBuilder,
   SectionBuilderFunction,
-  SectionContentWoMemoryBuilder,
-  SectionBuilderWoMemoryFunction,
+  SectionWoSubsectionBuilderFunction,
 } from "./section-builder.js";
+export type {
+  PromptContentBuilder,
+  PromptContentBuilderFunction,
+  PromptContentWoMemoryBuilder,
+  PromptContentWoToolsBuilder,
+  PromptContentWoOutputSpecsBuilder,
+} from './prompt-content-builder.js';
 export type {
   TableBuilder,
   TableBuilderFunction,

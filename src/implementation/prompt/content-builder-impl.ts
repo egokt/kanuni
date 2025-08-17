@@ -36,7 +36,7 @@ type ContentBuilderImplDatum<Params extends Record<string, any>> =
   | ContentBuilderImplTableDatum<Params>
   | ContentBuilderImplListDatum<Params>;
 
-export class ContentBuilderImpl<Params extends Record<string, any> = {}>
+export class ContentBuilderImpl<Params extends Record<string, any>>
   implements ContentBuilder<Params>
 {
   private builderData: ContentBuilderImplDatum<Params>[];

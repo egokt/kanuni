@@ -1,13 +1,18 @@
 import z from "zod";
-import { Kanuni, TextualMarkdownFormatter, withDescription } from "../../../src/index.js";
+import { Kanuni, RoleDefault, TextualMarkdownFormatter, withDescription } from "../../../src/index.js";
+import { Tool } from "../../../src/developer-api/types.js";
 
-
+// *****************************************************************************
 // Should be ok without memory and output
-Kanuni.newQuery<{ title: string }>()
-  .prompt(p => p.paragraph`This is a simple paragraph with title: ${'title'}`)
-  .build({ title: 'My Title' });
+// prettier-ignore
+const q1 = Kanuni.newQuery<{ title: string }>()
+  .prompt(p => p.paragraph`Hello`)
+  .build({ title: '123' });
 
-// Larger example with memory and output
+TextualMarkdownFormatter.format(q1);
+
+// *****************************************************************************
+// Should be ok with memory and output
 // prettier-ignore
 const query = Kanuni.newQuery<{ title: string }>()
   .prompt(p => p
@@ -48,4 +53,28 @@ const query = Kanuni.newQuery<{ title: string }>()
   }))
   .build({ title: 'My Title' })
 
-new TextualMarkdownFormatter().format(query);
+TextualMarkdownFormatter.format(query);
+
+
+// *****************************************************************************
+// Should align tools and tools type param
+// prettier-ignore
+const q3 = Kanuni.newQuery<{},RoleDefault, Tool<'tool1', { a: string; }> | Tool<'tool2', {}>>()
+  .prompt(p => p
+    .paragraph`Hello`
+  )
+  .tools({
+    tool1: {
+      name: 'tool1',
+      description: 'something',
+      parameters: { a: z.string() },
+    },
+    tool2: {
+      name: 'tool2',
+      description: 'The fabuloausliestish second tool',
+      parameters: {},
+    },
+  })
+  .build({});
+
+TextualMarkdownFormatter.format(q3);

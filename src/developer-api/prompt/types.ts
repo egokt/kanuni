@@ -1,11 +1,11 @@
-import { Memory } from "../memory/types.js";
-
 // This is one part in the prompt
 export type Section = {
   type: "section";
   heading?: string;
   contents: (ContentPart | Section)[];
-  memory?: Memory;
+  isMemorySection?: boolean;
+  isToolsSection?: boolean;
+  isOutputSpecsSection?: boolean;
 };
 
 export type ContentPart = Paragraph | Table | List;

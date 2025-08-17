@@ -6,4 +6,6 @@ export type {
   Memory,
   MemoryItem,
   RoleDefault,
+  ToolCall,
+  ToolCallResult,
 } from "./types.js";

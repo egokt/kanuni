@@ -1,6 +1,6 @@
 {
   "name": "kanuni",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Kanuni - The Prompt-Builder Library",
   "main": "./index.js",
   "types": "./index.d.ts",
