@@ -115,7 +115,7 @@ export class Kanuni {
    * // Deserialize a previously stored query
    * const serializedQuery = localStorage.getItem('query');
    * if (serializedQuery) {
-   *   const query = Kanuni.deserializeQuery<{ name: string }>(serializedQuery);
+   *   const query = await Kanuni.deserializeQuery<{ name: string }>(serializedQuery);
    *   // Use the deserialized query normally
    * }
    * ```
@@ -128,7 +128,7 @@ export class Kanuni {
    *   .build({ task: "Process data" });
    * 
    * const serialized = Kanuni.serializeQuery(originalQuery);
-   * const restored = Kanuni.deserializeQuery(serialized);
+   * const restored = await Kanuni.deserializeQuery(serialized);
    * // restored is functionally equivalent to originalQuery
    * ```
    */
