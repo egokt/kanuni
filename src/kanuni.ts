@@ -197,13 +197,13 @@ function makeToolsSerializable(toolRegistry: ToolRegistry<any>) {
     serializable[toolName] = {
       name: toolName,
       description: tool.description,
-      parameters: makeToolParamatersSerializable(tool.parameters),
+      parameters: makeToolParametersSerializable(tool.parameters),
     };
   }
   return serializable;
 }
 
-function makeToolParamatersSerializable(params: Tool<any, any>['parameters']) {
+function makeToolParametersSerializable(params: Tool<any, any>['parameters']) {
   const serializable: {[key: string]: Object} = {};
   for (const paramName in params) {
     serializable[paramName] = zodToJsonSchema(params[paramName]);
