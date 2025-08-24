@@ -2,3 +2,7 @@ export { MemoryBuilderImpl } from "./memory/index.js";
 export { QueryBuilderImpl } from "./query-builder-impl.js";
 export { TextualMarkdownFormatter } from "./formatters/textual-markdown-formatter.js";
 export { withDescription } from "./utils.js";
+export {
+  querySchema,
+  toolRegistrySchema,
+} from './schemas.js';
