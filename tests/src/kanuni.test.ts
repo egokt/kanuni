@@ -482,33 +482,33 @@ describe("Kanuni", () => {
   });
 
   describe("deserializeQuery", () => {
-    it("deserializes a simple text query", () => {
+    it("deserializes a simple text query", async () => {
       const originalQuery = Kanuni.newQuery<{ msg: string }>()
         .prompt((p) => p.paragraph`Message: ${"msg"}`)
         .build({ msg: "Hello" });
 
       const serialized = Kanuni.serializeQuery(originalQuery);
-      const deserialized = Kanuni.deserializeQuery(serialized);
+      const deserialized = await Kanuni.deserializeQuery(serialized);
 
       expect(deserialized.prompt).toEqual(originalQuery.prompt);
       expect(deserialized.output).toEqual({ type: "output-text" });
     });
 
-    it("deserializes a query with memory", () => {
+    it("deserializes a query with memory", async () => {
       const originalQuery = Kanuni.newQuery<{ name: string }>()
         .prompt((p) => p.paragraph`Hello ${"name"}`)
         .memory((m) => m.utterance("user", (data) => `I am ${data.name}`))
         .build({ name: "Alice" });
 
       const serialized = Kanuni.serializeQuery(originalQuery);
-      const deserialized = Kanuni.deserializeQuery(serialized);
+      const deserialized = await Kanuni.deserializeQuery(serialized);
 
       expect(deserialized.prompt).toEqual(originalQuery.prompt);
       expect(deserialized.memory).toEqual(originalQuery.memory);
       expect(deserialized.output).toEqual({ type: "output-text" });
     });
 
-    it("deserializes a JSON output query", () => {
+    it("deserializes a JSON output query", async () => {
       const schema = z.object({
         name: z.string(),
         age: z.number(),
@@ -520,7 +520,7 @@ describe("Kanuni", () => {
         .build({});
 
       const serialized = Kanuni.serializeQuery(originalQuery);
-      const deserialized = Kanuni.deserializeQuery(serialized);
+      const deserialized = await Kanuni.deserializeQuery<Record<string, any>>(serialized);
 
       expect(deserialized.prompt).toEqual(originalQuery.prompt);
       expect(deserialized.output.type).toBe("output-json");
@@ -529,22 +529,22 @@ describe("Kanuni", () => {
       expect(deserialized.output.schema.parse).toBeInstanceOf(Function);
     });
 
-    it("throws error for invalid JSON", () => {
+    it("throws error for invalid JSON", async () => {
       const invalidJson = "{ invalid json }";
 
-      expect(() => Kanuni.deserializeQuery(invalidJson)).toThrow("Kanuni: Error deserializing query.");
+      await expect(Kanuni.deserializeQuery(invalidJson)).rejects.toThrow("Kanuni: Error deserializing query.");
     });
 
-    it("throws error for valid JSON with invalid structure", () => {
+    it("throws error for valid JSON with invalid structure", async () => {
       const invalidStructure = JSON.stringify({
         prompt: "invalid prompt structure",
         output: "invalid output",
       });
 
-      expect(() => Kanuni.deserializeQuery(invalidStructure)).toThrow("Kanuni: Error deserializing query.");
+      await expect(Kanuni.deserializeQuery(invalidStructure)).rejects.toThrow("Kanuni: Error deserializing query.");
     });
 
-    it("handles missing optional components correctly", () => {
+    it("handles missing optional components correctly", async () => {
       const minimalQuery = {
         prompt: {
           type: "prompt",
@@ -554,7 +554,7 @@ describe("Kanuni", () => {
       };
 
       const serialized = JSON.stringify(minimalQuery);
-      const deserialized = Kanuni.deserializeQuery(serialized);
+      const deserialized = await Kanuni.deserializeQuery(serialized);
 
       expect(deserialized.prompt).toEqual(minimalQuery.prompt);
       expect(deserialized.output).toEqual({ type: "output-text" });
@@ -562,20 +562,20 @@ describe("Kanuni", () => {
       expect(deserialized.tools).toBeUndefined();
     });
 
-    it("preserves special characters and unicode", () => {
+    it("preserves special characters and unicode", async () => {
       const originalQuery = Kanuni.newQuery<{ msg: string }>()
         .prompt((p) => p.paragraph`${"msg"}`)
         .build({ msg: "Unicode: 🚀 ñáéíóú Special: @#$%^&*()" });
 
       const serialized = Kanuni.serializeQuery(originalQuery);
-      const deserialized = Kanuni.deserializeQuery(serialized);
+      const deserialized = await Kanuni.deserializeQuery(serialized);
 
       expect(deserialized.prompt.contents[0]).toEqual(
         originalQuery.prompt.contents[0]
       );
     });
 
-    it("deserializes a query with tools", () => {
+    it("deserializes a query with tools", async () => {
       const tools: ToolRegistry<SearchTool> = {
         search: {
           name: "search",
@@ -593,7 +593,7 @@ describe("Kanuni", () => {
         .build({});
 
       const serialized = Kanuni.serializeQuery(originalQuery);
-      const deserialized = Kanuni.deserializeQuery(serialized);
+      const deserialized = await Kanuni.deserializeQuery(serialized);
 
       expect(deserialized.prompt).toEqual(originalQuery.prompt);
       expect(deserialized.tools).toBeDefined();
@@ -603,7 +603,7 @@ describe("Kanuni", () => {
       expect((deserialized.tools as any).search.parameters.query.parse).toBeInstanceOf(Function);
     });
 
-    it("deserializes complex query with all components", () => {
+    it("deserializes complex query with all components", async () => {
       const tools: ToolRegistry<TestTool> = {
         test_tool: {
           name: "test_tool",
@@ -623,7 +623,7 @@ describe("Kanuni", () => {
         .build({ msg: "Test message" });
 
       const serialized = Kanuni.serializeQuery(originalQuery);
-      const deserialized = Kanuni.deserializeQuery(serialized);
+      const deserialized = await Kanuni.deserializeQuery(serialized);
 
       expect(deserialized.prompt).toEqual(originalQuery.prompt);
       expect(deserialized.memory).toEqual(originalQuery.memory);
@@ -631,7 +631,7 @@ describe("Kanuni", () => {
       expect(deserialized.output.type).toBe("output-json");
     });
 
-    it("maintains query structure after serialize/deserialize round trip", () => {
+    it("maintains query structure after serialize/deserialize round trip", async () => {
       const tools: ToolRegistry<MultiTools> = {
         search: {
           name: "search",
@@ -661,7 +661,7 @@ describe("Kanuni", () => {
         .build({ input: "Analyze this data" });
 
       const serialized = Kanuni.serializeQuery(originalQuery);
-      const deserialized = Kanuni.deserializeQuery(serialized);
+      const deserialized = await Kanuni.deserializeQuery<Record<string, any>>(serialized);
 
       // Compare structure (not exact equality due to schema transformation)
       expect(deserialized.prompt).toEqual(originalQuery.prompt);
@@ -725,7 +725,7 @@ describe("Kanuni", () => {
       });
     });
 
-    it("supports method chaining across all static methods", () => {
+    it("supports method chaining across all static methods", async () => {
       // Test that methods can be used in sequence for complex workflows
       const memoryBuilder = Kanuni.newMemory<{ context: string }>()
         .utterance("user", (data) => `Context: ${data.context}`);
@@ -740,14 +740,14 @@ describe("Kanuni", () => {
       const extractedMemory = Kanuni.extractMemoryFromQuery(query);
 
       const serialized = Kanuni.serializeQuery(query);
-      const deserialized = Kanuni.deserializeQuery(serialized);
+      const deserialized = await Kanuni.deserializeQuery(serialized);
 
       expect(builtMemory.contents).toHaveLength(1);
       expect(extractedMemory!.contents).toHaveLength(1);
       expect(deserialized.memory!.contents).toEqual(extractedMemory!.contents);
     });
 
-    it("maintains type safety across serialization", () => {
+    it("maintains type safety across serialization", async () => {
       type CustomRole = "admin" | "user";
       type CustomTool = Tool<"admin_action", { action: string }>;
 
@@ -757,7 +757,7 @@ describe("Kanuni", () => {
         .build({ command: "backup" });
 
       const serialized = Kanuni.serializeQuery(query);
-      const deserialized = Kanuni.deserializeQuery<{ command: string }, CustomRole, CustomTool>(serialized);
+      const deserialized = await Kanuni.deserializeQuery<{ command: string }, CustomRole, CustomTool>(serialized);
 
       expect(deserialized.memory!.contents[0]).toEqual({
         type: "utterance",
@@ -766,7 +766,7 @@ describe("Kanuni", () => {
       });
     });
 
-    it("handles performance edge case with large data", () => {
+    it("handles performance edge case with large data", async () => {
       // Test with reasonably large data to ensure no performance issues
       const largeArray = Array.from({ length: 100 }, (_, i) => `Item ${i}`);
       const largeData = {
@@ -780,7 +780,7 @@ describe("Kanuni", () => {
         .build(largeData);
 
       const serialized = Kanuni.serializeQuery(query);
-      const deserialized = Kanuni.deserializeQuery(serialized);
+      const deserialized = await Kanuni.deserializeQuery(serialized);
 
       expect(deserialized.prompt.contents[0]).toEqual(
         expect.objectContaining({ content: "Processing items" })
@@ -839,7 +839,7 @@ describe("Kanuni", () => {
       }
     });
 
-    it("validates schema preservation through serialization", () => {
+    it("validates schema preservation through serialization", async () => {
       const complexSchema = z.object({
         user: z.object({
           id: z.number(),
@@ -859,7 +859,7 @@ describe("Kanuni", () => {
         .build({});
 
       const serialized = Kanuni.serializeQuery(query);
-      const deserialized = Kanuni.deserializeQuery(serialized);
+      const deserialized = await Kanuni.deserializeQuery<Record<string, any>>(serialized);
 
       expect(deserialized.output.type).toBe("output-json");
       expect(deserialized.output.schemaName).toBe("user_data");
@@ -974,7 +974,7 @@ describe("Kanuni", () => {
       expect(memory1.contents).not.toBe(memory2.contents);
     });
 
-    it("handles serialization of queries with complex prompt structures", () => {
+    it("handles serialization of queries with complex prompt structures", async () => {
       const query = Kanuni.newQuery<{ title: string }>()
         .prompt((p) => 
           p.section((s) => 
@@ -996,7 +996,7 @@ describe("Kanuni", () => {
         .build({ title: "Test" });
 
       const serialized = Kanuni.serializeQuery(query);
-      const deserialized = Kanuni.deserializeQuery(serialized);
+      const deserialized = await Kanuni.deserializeQuery(serialized);
 
       expect(deserialized.prompt.contents).toHaveLength(1);
       expect(deserialized.prompt.contents[0].type).toBe("section");
