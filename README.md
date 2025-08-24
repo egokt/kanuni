@@ -14,6 +14,7 @@ Kanuni is a TypeScript library designed to help developers build structured, typ
 - [Working with Tools](#working-with-tools)
 - [Output Formats](#output-formats)
 - [Built-in Formatters](#built-in-formatters)
+- [Query Serialization](#query-serialization)
 - [Advanced Examples](#advanced-examples)
 
 ## Installation
@@ -32,6 +33,8 @@ A **Query** is the main structure that contains everything needed for an LLM cal
 - **Memory**: Conversation history and context
 - **Tools**: Available functions the LLM can call
 - **Output**: Specification for text or JSON responses
+
+Queries can be serialized to JSON strings for storage, transmission, or caching using `Kanuni.serializeQuery()` and restored with `Kanuni.deserializeQuery()`.
 
 ### Memory
 
@@ -414,6 +417,222 @@ const complexQuery = Kanuni.newQuery<{ task: string }>()
 const formatted = TextualMarkdownFormatter.format(complexQuery);
 // Produces markdown with sections for prompt, memory, tools, and output schema
 ```
+
+## Query Serialization
+
+Kanuni provides built-in support for serializing and deserializing queries, allowing you to store, transmit, or persist query objects as JSON strings. This is particularly useful for caching, database storage, or sending queries across network boundaries.
+
+### Serializing Queries
+
+Use `Kanuni.serializeQuery()` to convert any Query object into a JSON string:
+
+```typescript
+import { Kanuni, Tool, ToolRegistry } from "kanuni";
+import { z } from "zod";
+
+const query = Kanuni.newQuery<{ topic: string }>()
+  .prompt((p) =>
+    p.paragraph`Analyze the topic: ${"topic"}`.list(
+      (l) =>
+        l.item`Identify key themes`.item`Extract important details`
+          .item`Provide recommendations`
+    )
+  )
+  .memory((m) =>
+    m.utterance("user", (data) => `I want to learn about ${data.topic}`)
+  )
+  .outputJson(
+    z.object({
+      themes: z.array(z.string()),
+      details: z.array(z.string()),
+      recommendations: z.array(z.string()),
+    }),
+    "analysis_result"
+  )
+  .build({ topic: "machine learning" });
+
+// Serialize the query to JSON string
+const serializedQuery = Kanuni.serializeQuery(query);
+
+// Store in localStorage, send over network, save to database, etc.
+localStorage.setItem("analysisQuery", serializedQuery);
+```
+
+### Deserializing Queries
+
+Use `Kanuni.deserializeQuery()` to convert a serialized JSON string back into a functional Query object:
+
+```typescript
+// Retrieve the serialized query
+const storedQuery = localStorage.getItem("analysisQuery");
+
+if (storedQuery) {
+  // Deserialize back to a Query object
+  const restoredQuery = Kanuni.deserializeQuery<{ topic: string }>(storedQuery);
+
+  // The restored query is fully functional
+  console.log(restoredQuery.prompt.type); // 'prompt'
+  console.log(restoredQuery.output.type); // 'output-json'
+  console.log(restoredQuery.memory?.contents.length); // 1
+
+  // You can use it just like the original query
+  // Note: You'll need to format it with a provider-specific formatter
+}
+```
+
+### Working with Tools in Serialization
+
+Queries with tools are automatically handled during serialization. Zod schemas for tool parameters are converted to JSON Schema format:
+
+```typescript
+import { z } from "zod";
+
+// Define tool types for the examples
+type SearchTool = Tool<"search", { query: string; limit?: number }>;
+type AnalysisTool = Tool<
+  "analyze",
+  { data: string; type: "sentiment" | "keywords" | "summary" }
+>;
+
+const tools: ToolRegistry<SearchTool | AnalysisTool> = {
+  search: {
+    name: "search",
+    description: "Search for information",
+    parameters: {
+      query: z.string().describe("Search query"),
+      limit: z.number().optional().describe("Max results"),
+    },
+  },
+  analyze: {
+    name: "analyze",
+    description: "Analyze data",
+    parameters: {
+      data: z.string().describe("Data to analyze"),
+      type: z.enum(["sentiment", "keywords", "summary"]),
+    },
+  },
+};
+
+const queryWithTools = Kanuni.newQuery<{ task: string }>()
+  .prompt((p) => p.paragraph`Task: ${"task"}`)
+  .tools(tools)
+  .outputJson(z.object({ result: z.string() }))
+  .build({ task: "Analyze user feedback" });
+
+// Serialize and deserialize
+const serialized = Kanuni.serializeQuery(queryWithTools);
+const restored = Kanuni.deserializeQuery(serialized);
+
+// Tools are preserved and functional
+console.log(Object.keys(restored.tools!)); // ['search', 'analyze']
+```
+
+### Practical Use Cases
+
+#### 1. Query Templates and Caching
+
+```typescript
+// Create reusable query templates
+const createAnalysisQuery = (analysisType: string) => {
+  return Kanuni.newQuery<{ data: string }>()
+    .prompt((p) => p.paragraph`Perform ${analysisType} analysis on: ${"data"}`)
+    .outputJson(
+      z.object({
+        analysis_type: z.string(),
+        results: z.array(z.string()),
+        confidence: z.number(),
+      })
+    )
+    .build({ data: "" }); // Template with empty data
+};
+
+// Serialize templates for reuse
+const templates = {
+  sentiment: Kanuni.serializeQuery(createAnalysisQuery("sentiment")),
+  keyword: Kanuni.serializeQuery(createAnalysisQuery("keyword")),
+  summary: Kanuni.serializeQuery(createAnalysisQuery("summary")),
+};
+
+// Later, deserialize and use with actual data
+const sentimentQuery = Kanuni.deserializeQuery(templates.sentiment);
+// Update with actual data by rebuilding or using a formatter
+```
+
+#### 2. Database Storage
+
+```typescript
+interface StoredQuery {
+  id: string;
+  name: string;
+  description: string;
+  query_json: string;
+  created_at: Date;
+}
+
+// Save query to database
+const saveQuery = async (
+  name: string,
+  description: string,
+  query: Query<any, any, any>
+) => {
+  const serialized = Kanuni.serializeQuery(query);
+
+  await database.queries.create({
+    id: generateId(),
+    name,
+    description,
+    query_json: serialized,
+    created_at: new Date(),
+  });
+};
+
+// Load and use query from database
+const loadQuery = async (queryId: string) => {
+  const stored = await database.queries.findById(queryId);
+  if (stored) {
+    return Kanuni.deserializeQuery(stored.query_json);
+  }
+  return null;
+};
+```
+
+#### 3. API Communication
+
+```typescript
+// Client side - send query to server
+const clientQuery = Kanuni.newQuery<{ userInput: string }>()
+  .prompt((p) => p.paragraph`Process: ${"userInput"}`)
+  .build({ userInput: "User's request" });
+
+const response = await fetch("/api/process-query", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    query: Kanuni.serializeQuery(clientQuery),
+    metadata: { userId: "user123" },
+  }),
+});
+
+// Server side - receive and process query
+app.post("/api/process-query", (req, res) => {
+  const { query: serializedQuery, metadata } = req.body;
+
+  // Deserialize the query
+  const query = Kanuni.deserializeQuery(serializedQuery);
+
+  // Process with your LLM provider
+  const result = await processWithLLM(query);
+
+  res.json({ result });
+});
+```
+
+### Important Considerations
+
+- **Schema Conversion**: Zod schemas are converted to JSON Schema during serialization and back to Zod during deserialization. The functional behavior is preserved, but object identity is not.
+- **Security**: Deserialization uses `eval()` for schema reconstruction. Only deserialize trusted input.
+- **Performance**: Serialization is fast, but deserializing complex schemas may have some overhead due to schema reconstruction.
+- **Compatibility**: Serialized queries are forward-compatible but may not be backward-compatible across major Kanuni versions.
 
 ## Advanced Examples
 
