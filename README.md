@@ -466,18 +466,21 @@ Use `Kanuni.deserializeQuery()` to convert a serialized JSON string back into a 
 // Retrieve the serialized query
 const storedQuery = localStorage.getItem("analysisQuery");
 
-if (storedQuery) {
-  // Deserialize back to a Query object
-  const restoredQuery = Kanuni.deserializeQuery<{ topic: string }>(storedQuery);
+  if (storedQuery) {
+    // Deserialize back to a Query object
+    const restoredQuery = await Kanuni.deserializeQuery<{ topic: string }>(storedQuery);
 
-  // The restored query is fully functional
-  console.log(restoredQuery.prompt.type); // 'prompt'
-  console.log(restoredQuery.output.type); // 'output-json'
-  console.log(restoredQuery.memory?.contents.length); // 1
+    // The restored query is fully functional
+    console.log(restoredQuery.prompt.type); // 'prompt'
+    console.log(restoredQuery.output.type); // 'output-json'
+    console.log(restoredQuery.memory?.contents.length); // 1
 
-  // You can use it just like the original query
-  // Note: You'll need to format it with a provider-specific formatter
-}
+    // You can use it just like the original query
+    // Note: You'll need to format it with a provider-specific formatter
+    return restoredQuery;
+  }
+  return null;
+};
 ```
 
 ### Working with Tools in Serialization
@@ -521,7 +524,7 @@ const queryWithTools = Kanuni.newQuery<{ task: string }>()
 
 // Serialize and deserialize
 const serialized = Kanuni.serializeQuery(queryWithTools);
-const restored = Kanuni.deserializeQuery(serialized);
+const restored = await Kanuni.deserializeQuery(serialized);
 
 // Tools are preserved and functional
 console.log(Object.keys(restored.tools!)); // ['search', 'analyze']
@@ -554,7 +557,7 @@ const templates = {
 };
 
 // Later, deserialize and use with actual data
-const sentimentQuery = Kanuni.deserializeQuery(templates.sentiment);
+const sentimentQuery = await Kanuni.deserializeQuery(templates.sentiment);
 // Update with actual data by rebuilding or using a formatter
 ```
 
@@ -590,7 +593,7 @@ const saveQuery = async (
 const loadQuery = async (queryId: string) => {
   const stored = await database.queries.findById(queryId);
   if (stored) {
-    return Kanuni.deserializeQuery(stored.query_json);
+    return await Kanuni.deserializeQuery(stored.query_json);
   }
   return null;
 };
@@ -614,11 +617,11 @@ const response = await fetch("/api/process-query", {
 });
 
 // Server side - receive and process query
-app.post("/api/process-query", (req, res) => {
+app.post("/api/process-query", async (req, res) => {
   const { query: serializedQuery, metadata } = req.body;
 
   // Deserialize the query
-  const query = Kanuni.deserializeQuery(serializedQuery);
+  const query = await Kanuni.deserializeQuery(serializedQuery);
 
   // Process with your LLM provider
   const result = await processWithLLM(query);
@@ -631,7 +634,7 @@ app.post("/api/process-query", (req, res) => {
 
 - **Schema Conversion**: Zod schemas are converted to JSON Schema during serialization and back to Zod during deserialization. The functional behavior is preserved, but object identity is not.
 - **Security**: Deserialization uses `eval()` for schema reconstruction. Only deserialize trusted input.
-- **Performance**: Serialization is fast, but deserializing complex schemas may have some overhead due to schema reconstruction.
+- **Performance**: Serialization is fast, but deserializing complex schemas may have some overhead due to schema reconstruction. Deserialization is asynchronous.
 - **Compatibility**: Serialized queries are forward-compatible but may not be backward-compatible across major Kanuni versions.
 
 ## Advanced Examples
