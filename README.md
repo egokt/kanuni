@@ -71,10 +71,10 @@ interface MyData {
 
 // Create a simple query
 const query = Kanuni.newQuery<MyData>()
-  .prompt(
-    (p) =>
-      p.paragraph`Context: ${"context"}`.paragraph`Question: ${"userQuestion"}`
-        .paragraph`Please provide a helpful response.`
+  .prompt((p) => p
+    .paragraph`Context: ${"context"}`
+    .paragraph`Question: ${"userQuestion"}`
+    .paragraph`Please provide a helpful response.`
   )
   .build({
     userQuestion: "What is TypeScript?",
@@ -92,10 +92,9 @@ console.log(query.prompt);
 
 ```typescript
 const query = Kanuni.newQuery<{ name: string; age: number }>()
-  .prompt((p) =>
-    p.paragraph`Hello, ${"name"}! You are ${"age"} years old.`.paragraph(
-      (data) => `Welcome, ${data.name}!`
-    )
+  .prompt((p) => p
+    .paragraph`Hello, ${"name"}! You are ${"age"} years old.`
+    .paragraph((data) => `Welcome, ${data.name}!`)
   )
   .build({ name: "Alice", age: 30 });
 ```
@@ -104,24 +103,25 @@ const query = Kanuni.newQuery<{ name: string; age: number }>()
 
 ```typescript
 const query = Kanuni.newQuery<{ items: string[] }>()
-  .prompt(p =>
-    p.paragraph`Shopping list:`
-     .list(l =>
-       l.item`Buy milk`
-        .item`Buy bread`
-        .item((data) => `Buy ${data.items[0]}`)
-     )
+  .prompt(p => p
+    .paragraph`Shopping list:`
+    .list(l => l
+      .item`Buy milk`
+      .item`Buy bread`
+      .item((data) => `Buy ${data.items[0]}`)
+    )
   )
   .build({ items: ["apples"] });
 
 // Using items() to create dynamic lists from arrays
 const dynamicQuery = Kanuni.newQuery<{ tasks: string[] }>()
-  .prompt(p =>
-    p.paragraph`Today's tasks:`
-     .list((l, data) =>
-       l.items(data.tasks, (i, task) =>
-         i.item(_ => task)
-     )
+  .prompt(p => p
+    .paragraph`Today's tasks:`
+    .list((l, data) => l
+      .items(data.tasks, (i, task) => i
+        .item(_ => task)
+      )
+    )
   )
   .build({ tasks: ["Review code", "Write tests", "Deploy to production"] });
 ```
@@ -132,16 +132,17 @@ const dynamicQuery = Kanuni.newQuery<{ tasks: string[] }>()
 const query = Kanuni.newQuery<{
   users: Array<{ name: string; role: string }>;
 }>()
-  .prompt((p) =>
-    p.paragraph`User Information:`.table((t) =>
-      t
-        .columnHeaders(() => ["Name", "Role"])
-        .row((r) =>
-          r.cell((c) => c.paragraph`Alice`).cell((c) => c.paragraph`Admin`)
-        )
-        .row((r) =>
-          r.cell((c) => c.paragraph`Bob`).cell((c) => c.paragraph`User`)
-        )
+  .prompt((p) => p
+    .paragraph`User Information:`.table((t) => t
+      .columnHeaders(() => ["Name", "Role"])
+      .row((r) => r
+        .cell((c) => c.paragraph`Alice`)
+        .cell((c) => c.paragraph`Admin`)
+      )
+      .row((r) => r
+        .cell((c) => c.paragraph`Bob`)
+        .cell((c) => c.paragraph`User`)
+      )
     )
   )
   .build({ users: [] });
@@ -151,13 +152,13 @@ const query = Kanuni.newQuery<{
 
 ```typescript
 const query = Kanuni.newQuery<{ title: string }>()
-  .prompt((p) =>
-    p.section((s) =>
-      s.heading`Instructions for ${"title"}`
-        .paragraph`Please follow these steps:`.list(
-        (l) =>
-          l.item`Step 1: Read the documentation`
-            .item`Step 2: Practice with examples`
+  .prompt((p) => p
+    .section((s) => s
+      .heading`Instructions for ${"title"}`
+      .paragraph`Please follow these steps:`
+      .list((l) => l
+        .item`Step 1: Read the documentation`
+        .item`Step 2: Practice with examples`
       )
     )
   )
@@ -170,14 +171,15 @@ const query = Kanuni.newQuery<{ title: string }>()
 
 ```typescript
 const query = Kanuni.newQuery<{ userName: string }>()
-  .prompt((p) => p.paragraph`How can I help you today?`)
-  .memory((m) =>
-    m
-      .utterance("user", (data) => `Hi, my name is ${data.userName}`)
-      .utterance(
-        "assistant",
-        () => "Hello! Nice to meet you. How can I assist you?"
-      )
+  .prompt((p) => p
+    .paragraph`How can I help you today?`
+  )
+  .memory((m) => m
+    .utterance("user", (data) => `Hi, my name is ${data.userName}`)
+    .utterance(
+      "assistant",
+      () => "Hello! Nice to meet you. How can I assist you?"
+    )
   )
   .build({ userName: "Alice" });
 ```
@@ -188,15 +190,14 @@ const query = Kanuni.newQuery<{ userName: string }>()
 type WeatherTool = Tool<"get_weather", { location: string }>;
 
 const query = Kanuni.newQuery<{}, RoleDefault, WeatherTool>()
-  .memory((m) =>
-    m
-      .utterance("user", () => "What's the weather in London?")
-      .toolCall("get_weather", '{"location": "London"}', "call-123")
-      .toolCallResult("call-123", "Sunny, 22°C")
-      .utterance(
-        "assistant",
-        () => "The weather in London is sunny with a temperature of 22°C."
-      )
+  .memory((m) => m
+    .utterance("user", () => "What's the weather in London?")
+    .toolCall("get_weather", '{"location": "London"}', "call-123")
+    .toolCallResult("call-123", "Sunny, 22°C")
+    .utterance(
+      "assistant",
+      () => "The weather in London is sunny with a temperature of 22°C."
+    )
   )
   .build({});
 ```
@@ -205,14 +206,13 @@ const query = Kanuni.newQuery<{}, RoleDefault, WeatherTool>()
 
 ```typescript
 const query = Kanuni.newQuery()
-  .memory((m) =>
-    m
-      .utterance("user", "Customer", () => "I need help with my order")
-      .utterance(
-        "assistant",
-        "Support Agent",
-        () => "I'd be happy to help you with your order"
-      )
+  .memory((m) => m
+    .utterance("user", "Customer", () => "I need help with my order")
+    .utterance(
+      "assistant",
+      "Support Agent",
+      () => "I'd be happy to help you with your order"
+    )
   )
   .build({});
 ```
@@ -221,10 +221,11 @@ const query = Kanuni.newQuery()
 
 ```typescript
 // Build memory separately
-const memoryBuilder = Kanuni.newMemory<{ prevContext: string }>().utterance(
-  "user",
-  (data) => `Previous context: ${data.prevContext}`
-);
+const memoryBuilder = Kanuni.newMemory<{ prevContext: string }>()
+  .utterance(
+    "user",
+    (data) => `Previous context: ${data.prevContext}`
+  );
 
 // Extract memory from a previous query
 const previousMemory = Kanuni.extractMemoryFromQuery(previousQuery);
@@ -232,10 +233,9 @@ const previousMemory = Kanuni.extractMemoryFromQuery(previousQuery);
 // Use in new query
 const newQuery = Kanuni.newQuery<{ newInput: string }>()
   .prompt((p) => p.paragraph`New input: ${"newInput"}`)
-  .memory((m) =>
-    m
-      .append(previousMemory?.contents || [])
-      .utterance("user", (data) => data.newInput)
+  .memory((m) => m
+    .append(previousMemory?.contents || [])
+    .utterance("user", (data) => data.newInput)
   )
   .build({ newInput: "Continue the conversation" });
 ```
@@ -301,10 +301,9 @@ const PersonSchema = z.object({
 });
 
 const query = Kanuni.newQuery<{ resume: string }>()
-  .prompt(
-    (p) =>
-      p.paragraph`Extract person information from this resume:`
-        .paragraph`${"resume"}`
+  .prompt((p) => p
+    .paragraph`Extract person information from this resume:`
+    .paragraph`${"resume"}`
   )
   .outputJson(PersonSchema, "person_info")
   .build({
@@ -315,9 +314,10 @@ const query = Kanuni.newQuery<{ resume: string }>()
 ### Switching Output Formats
 
 ```typescript
-const baseQuery = Kanuni.newQuery<{ data: string }>().prompt(
-  (p) => p.paragraph`Process: ${"data"}`
-);
+const baseQuery = Kanuni.newQuery<{ data: string }>()
+  .prompt(
+    (p) => p.paragraph`Process: ${"data"}`
+  );
 
 // Text version
 const textQuery = baseQuery.outputText().build({ data: "some data" });
@@ -338,13 +338,15 @@ Kanuni includes a `TextualMarkdownFormatter` that converts queries into human-re
 import { Kanuni, TextualMarkdownFormatter } from "kanuni";
 
 const query = Kanuni.newQuery<{ topic: string }>()
-  .prompt((p) =>
-    p.paragraph`Explain ${"topic"} in simple terms.`.list(
-      (l) => l.item`Use clear examples`.item`Avoid jargon`
+  .prompt((p) => p
+    .paragraph`Explain ${"topic"} in simple terms.`
+    .list((l) => l
+      .item`Use clear examples`
+      .item`Avoid jargon`
     )
   )
-  .memory((m) =>
-    m.utterance("user", (data) => `I want to learn about ${data.topic}`)
+  .memory((m) => m
+    .utterance("user", (data) => `I want to learn about ${data.topic}`)
   )
   .build({ topic: "machine learning" });
 
@@ -384,35 +386,31 @@ The formatter handles special sections automatically:
 
 ```typescript
 const complexQuery = Kanuni.newQuery<{ task: string }>()
-  .prompt((p) => p.paragraph`Task: ${"task"}`)
-  .memorySection(
-    (s) =>
-      s.heading`Previous Conversation`
-        .paragraph`Reference the conversation history below`
+  .prompt((p) => p
+    .paragraph`Task: ${"task"}`
+    .memorySection((s) => s
+      .heading`Previous Conversation`
+      .paragraph`Reference the conversation history below`
+    )
+    .toolsSection((s) => s
+      .heading`Available Tools`
+      .paragraph`You can use these functions to complete the task`
+    )
+    .outputSpecsSection((s) => s
+      .heading`Response Format`
+      .paragraph`Respond using the specified JSON structure`
+    )
   )
-  .toolsSection(
-    (s) =>
-      s.heading`Available Tools`
-        .paragraph`You can use these functions to complete the task`
-  )
-  .outputSpecsSection(
-    (s) =>
-      s.heading`Response Format`
-        .paragraph`Respond using the specified JSON structure`
-  )
-  .memory((m) =>
-    m
-      .utterance("user", () => "Hello, I need help")
-      .utterance("assistant", () => "I'm here to help!")
+  .memory((m) => m
+    .utterance("user", () => "Hello, I need help")
+    .utterance("assistant", () => "I'm here to help!")
   )
   .tools(myTools)
-  .outputJson(
-    z.object({
-      result: z.string(),
-      confidence: z.number(),
-    })
-  )
-  .build({ task: "Complete analysis" });
+  .outputJson(z.object({
+    result: z.string(),
+    confidence: z.number(),
+  }))
+  .build({ task: "Complete analysis" }); 
 
 const formatted = TextualMarkdownFormatter.format(complexQuery);
 // Produces markdown with sections for prompt, memory, tools, and output schema
@@ -431,15 +429,16 @@ import { Kanuni, Tool, ToolRegistry } from "kanuni";
 import { z } from "zod";
 
 const query = Kanuni.newQuery<{ topic: string }>()
-  .prompt((p) =>
-    p.paragraph`Analyze the topic: ${"topic"}`.list(
-      (l) =>
-        l.item`Identify key themes`.item`Extract important details`
-          .item`Provide recommendations`
+  .prompt((p) => p
+    .paragraph`Analyze the topic: ${"topic"}`
+    .list((l) => l
+      .item`Identify key themes`
+      .item`Extract important details`
+      .item`Provide recommendations`
     )
   )
-  .memory((m) =>
-    m.utterance("user", (data) => `I want to learn about ${data.topic}`)
+  .memory((m) => m
+    .utterance("user", (data) => `I want to learn about ${data.topic}`)
   )
   .outputJson(
     z.object({
@@ -466,21 +465,21 @@ Use `Kanuni.deserializeQuery()` to convert a serialized JSON string back into a 
 // Retrieve the serialized query
 const storedQuery = localStorage.getItem("analysisQuery");
 
-  if (storedQuery) {
-    // Deserialize back to a Query object
-    const restoredQuery = await Kanuni.deserializeQuery<{ topic: string }>(storedQuery);
+if (storedQuery) {
+  // Deserialize back to a Query object
+  const restoredQuery = await Kanuni.deserializeQuery<{ topic: string }>(
+    storedQuery
+  );
 
-    // The restored query is fully functional
-    console.log(restoredQuery.prompt.type); // 'prompt'
-    console.log(restoredQuery.output.type); // 'output-json'
-    console.log(restoredQuery.memory?.contents.length); // 1
+  // The restored query is fully functional
+  console.log(restoredQuery.prompt.type); // 'prompt'
+  console.log(restoredQuery.output.type); // 'output-json'
+  console.log(restoredQuery.memory?.contents.length); // 1
 
-    // You can use it just like the original query
-    // Note: You'll need to format it with a provider-specific formatter
-    return restoredQuery;
-  }
-  return null;
-};
+  // now you can use restoredQuery just like the original query
+  // Note: You'll need to format it with a provider-specific formatter
+  restoredQuery;
+}
 ```
 
 ### Working with Tools in Serialization
@@ -538,14 +537,14 @@ console.log(Object.keys(restored.tools!)); // ['search', 'analyze']
 // Create reusable query templates
 const createAnalysisQuery = (analysisType: string) => {
   return Kanuni.newQuery<{ data: string }>()
-    .prompt((p) => p.paragraph`Perform ${analysisType} analysis on: ${"data"}`)
-    .outputJson(
-      z.object({
-        analysis_type: z.string(),
-        results: z.array(z.string()),
-        confidence: z.number(),
-      })
+    .prompt((p) => p
+      .paragraph`Perform ${analysisType} analysis on: ${"data"}`
     )
+    .outputJson(z.object({
+      analysis_type: z.string(),
+      results: z.array(z.string()),
+      confidence: z.number(),
+    }))
     .build({ data: "" }); // Template with empty data
 };
 
@@ -650,38 +649,39 @@ interface AnalysisRequest {
 }
 
 const query = Kanuni.newQuery<AnalysisRequest>()
-  .prompt((p) =>
-    p.paragraph`Document Analysis Request`
-
-      .section((s) => s.heading`Document Content`.paragraph`${"document"}`)
-
-      .section((s) =>
-        s.heading`Analysis Requirements`.list((l, data) => {
-          data.requirements.forEach((req) => {
-            l.item(() => req);
-          });
-          return l;
-        })
-      )
+  .prompt((p) => p
+    .paragraph`Document Analysis Request`
+    .section((s) => s
+      .heading`Document Content`
+      .paragraph`${"document"}`
+    )
+    .section((s) => s
+      .heading`Analysis Requirements`
+      .list((l, data) => {
+        data.requirements.forEach((req) => {
+          l.item(() => req);
+        });
+        return l;
+      })
+    )
+    .memorySection((s) => s
+      .heading`Previous Context`
+      .paragraph`${"previousFindings"}`
+    )
+    .toolsSection((s) => s
+      .heading`Available Analysis Tools`
+      .paragraph`Use the document_analyzer tool for detailed analysis`
+    )
+    .outputSpecsSection((s) => s
+      .heading`Output Requirements`
+      .paragraph`Format: ${"outputFormat"}`
+    )
   )
-  .memorySection(
-    (s) => s.heading`Previous Context`.paragraph`${"previousFindings"}`
-  )
-  .toolsSection(
-    (s) =>
-      s.heading`Available Analysis Tools`
-        .paragraph`Use the document_analyzer tool for detailed analysis`
-  )
-  .outputSpecsSection(
-    (s) => s.heading`Output Requirements`.paragraph`Format: ${"outputFormat"}`
-  )
-  .outputJson(
-    z.object({
-      summary: z.string(),
-      keyFindings: z.array(z.string()),
-      confidence: z.number().min(0).max(1),
-    })
-  )
+  .outputJson(z.object({
+    summary: z.string(),
+    keyFindings: z.array(z.string()),
+    confidence: z.number().min(0).max(1),
+  }))
   .build({
     document: "Long document content...",
     requirements: [
@@ -776,12 +776,13 @@ interface ConversationState {
 
 // First interaction
 const initialQuery = Kanuni.newQuery<ConversationState>()
-  .prompt(
-    (p) =>
-      p.paragraph`You are a helpful assistant. Respond in ${"userPreferences"} style.`
-        .paragraph`User preferences: ${"userPreferences"}`
+  .prompt((p) => p
+    .paragraph`You are a helpful assistant. Respond in ${"userPreferences"} style.`
+    .paragraph`User preferences: ${"userPreferences"}`
   )
-  .memory((m) => m.utterance("user", (data) => data.currentMessage))
+  .memory((m) => 
+    m.utterance("user", (data) => data.currentMessage)
+  )
   .build({
     currentMessage: "Hello, I'm interested in learning about TypeScript",
     userPreferences: {
@@ -794,19 +795,17 @@ const initialQuery = Kanuni.newQuery<ConversationState>()
 const previousMemory = Kanuni.extractMemoryFromQuery(initialQuery);
 
 const followUpQuery = Kanuni.newQuery<ConversationState>()
-  .prompt(
-    (p) =>
-      p.paragraph`Continue the conversation, maintaining the same helpful tone.`
+  .prompt((p) => p
+    .paragraph`Continue the conversation, maintaining the same helpful tone.`
   )
-  .memory((m) =>
-    m
-      .append(previousMemory?.contents || [])
-      .utterance(
-        "assistant",
-        () =>
-          "I'd be happy to help you learn TypeScript! TypeScript is a strongly typed programming language..."
-      )
-      .utterance("user", (data) => data.currentMessage)
+  .memory((m) => m
+    .append(previousMemory?.contents || [])
+    .utterance(
+      "assistant",
+      () =>
+        "I'd be happy to help you learn TypeScript! TypeScript is a strongly typed programming language..."
+    )
+    .utterance("user", (data) => data.currentMessage)
   )
   .build({
     currentMessage: "Can you show me some examples?",
